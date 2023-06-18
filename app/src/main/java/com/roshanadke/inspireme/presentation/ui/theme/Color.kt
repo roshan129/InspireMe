@@ -1,4 +1,4 @@
-package com.roshanadke.inspireme.ui.theme
+package com.roshanadke.inspireme.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

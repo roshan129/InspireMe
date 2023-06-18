@@ -10,15 +10,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.roshanadke.inspireme.ui.theme.InspireMeTheme
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.roshanadke.inspireme.presentation.ui.theme.InspireMeTheme
+import com.roshanadke.inspireme.presentation.viewmodel.QuotesViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             InspireMeTheme {
 
-                Text(text = "start")
+                val quotesViewModel: QuotesViewModel =  hiltViewModel()
+                val quote = quotesViewModel.singleQuote.value
+
+                Text(text = quote?.author ?: "start")
 
             }
         }
