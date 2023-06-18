@@ -18,6 +18,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             InspireMeTheme {
 
+                Text(text = "start")
 
             }
         }
