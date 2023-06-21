@@ -28,8 +28,8 @@ class QuotesViewModel @Inject constructor(
     val randomQuotes: State<List<Quote>> = _randomQuotes
 
     init {
-        getSingleQuote()
-        getRandomQuotes()
+        /*getSingleQuote()
+        getRandomQuotes()*/
     }
 
     fun getSingleQuote() {
