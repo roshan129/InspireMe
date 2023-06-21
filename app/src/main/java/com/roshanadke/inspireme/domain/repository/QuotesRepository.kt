@@ -8,6 +8,6 @@ interface QuotesRepository {
 
     fun getSingleRandomQuote(): Flow<Resource<Quote>>
 
-    fun getRandomQuotes(): Flow<Resource<List<Quote>>>
+    fun getRandomQuotes(limit: Int): Flow<Resource<List<Quote>>>
 
 }

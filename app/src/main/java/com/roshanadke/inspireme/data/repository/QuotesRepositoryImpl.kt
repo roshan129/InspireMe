@@ -1,5 +1,6 @@
 package com.roshanadke.inspireme.data.repository
 
+import com.roshanadke.inspireme.common.Constants
 import com.roshanadke.inspireme.common.Resource
 import com.roshanadke.inspireme.data.network.InspireMeApiService
 import com.roshanadke.inspireme.domain.model.Quote
@@ -28,8 +29,17 @@ class QuotesRepositoryImpl(
 
     }
 
-    override fun getRandomQuotes(): Flow<Resource<List<Quote>>> = flow {
+    override fun getRandomQuotes(limit: Int): Flow<Resource<List<Quote>>> = flow {
         emit(Resource.Loading())
+
+        try {
+            val results = inspireMeApi.getRandomQuotes(limit)
+            emit(Resource.Success(results.map { it.toQuote() }))
+        } catch (e: IOException) {
+            emit(Resource.Error(message = "Please check your internet connection"))
+        } catch (e: Exception) {
+            emit(Resource.Error(message = "Some unexpected error occurred"))
+        }
 
     }
 }

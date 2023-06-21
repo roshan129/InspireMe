@@ -3,6 +3,7 @@ package com.roshanadke.inspireme
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -24,8 +25,16 @@ class MainActivity : ComponentActivity() {
 
                 val quotesViewModel: QuotesViewModel =  hiltViewModel()
                 val quote = quotesViewModel.singleQuote.value
+                val randomQuotes = quotesViewModel.randomQuotes.value
 
-                Text(text = quote?.author ?: "start")
+                Column {
+
+                    Text(text = quote?.author ?: "start")
+
+                    randomQuotes.forEach {
+                        Text(text = it.author)
+                    }
+                }
 
             }
         }

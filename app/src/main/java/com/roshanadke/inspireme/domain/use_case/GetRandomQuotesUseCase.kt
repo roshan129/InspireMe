@@ -4,14 +4,14 @@ import com.roshanadke.inspireme.common.Resource
 import com.roshanadke.inspireme.domain.model.Quote
 import com.roshanadke.inspireme.domain.repository.QuotesRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
-
-class GetSingleRandomQuoteUseCase(
+class GetRandomQuotesUseCase(
     private val quotesRepository: QuotesRepository
 ) {
 
-    operator fun invoke(): Flow<Resource<Quote>> {
-        return quotesRepository.getSingleRandomQuote()
+    operator fun invoke(limit: Int): Flow<Resource<List<Quote>>> {
+        return quotesRepository.getRandomQuotes(limit)
     }
 
 }
