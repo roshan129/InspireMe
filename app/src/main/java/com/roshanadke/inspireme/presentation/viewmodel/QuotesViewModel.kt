@@ -30,6 +30,7 @@ class QuotesViewModel @Inject constructor(
     init {
         /*getSingleQuote()
         getRandomQuotes()*/
+        getRandomQuotes()
     }
 
     fun getSingleQuote() {
