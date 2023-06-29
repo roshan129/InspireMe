@@ -8,7 +8,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roshanadke.inspireme.common.Constants
 import com.roshanadke.inspireme.common.Resource
+import com.roshanadke.inspireme.domain.model.Author
 import com.roshanadke.inspireme.domain.model.Quote
+import com.roshanadke.inspireme.domain.use_case.AuthorUseCases
 import com.roshanadke.inspireme.domain.use_case.GetSingleRandomQuoteUseCase
 import com.roshanadke.inspireme.domain.use_case.QuotesUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,11 +20,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class QuotesViewModel @Inject constructor(
-    private val quotesUseCases: QuotesUseCases
+    private val quotesUseCases: QuotesUseCases,
+    private val authorUseCases: AuthorUseCases,
 ) : ViewModel() {
 
     private var _singleQuote: MutableState<Quote?> = mutableStateOf(null)
     val singleQuote: State<Quote?> = _singleQuote
+
+    private var _authorInfo: MutableState<Author?> = mutableStateOf(null)
+    val authorInfo: State<Author?> = _authorInfo
 
     private var _randomQuotes: MutableState<List<Quote>> = mutableStateOf(emptyList())
     val randomQuotes: State<List<Quote>> = _randomQuotes
@@ -30,19 +36,22 @@ class QuotesViewModel @Inject constructor(
     init {
         /*getSingleQuote()
         getRandomQuotes()*/
-        getRandomQuotes()
+        //getRandomQuotes()
+        getAuthorInfo("ovid")
     }
 
     fun getSingleQuote() {
 
         quotesUseCases.getSingleRandomQuoteUseCase().onEach {
-            when(it) {
+            when (it) {
                 is Resource.Error -> {
                     Log.d("TAG", "getSingleQuote: error")
                 }
+
                 is Resource.Loading -> {
                     Log.d("TAG", "getSingleQuote: loading")
                 }
+
                 is Resource.Success -> {
                     Log.d("TAG", "getSingleQuote: in success ")
                     Log.d("TAG", "getSingleQuote: in success: ${it.data?.author} ")
@@ -58,13 +67,15 @@ class QuotesViewModel @Inject constructor(
         quotesUseCases.getRandomQuotesUseCase(Constants.RANDOM_QUOTES_API_LIMIT)
             .onEach {
 
-                when(it) {
+                when (it) {
                     is Resource.Error -> {
                         Log.d("TAG", "getRandomQuotes: error")
                     }
+
                     is Resource.Loading -> {
                         Log.d("TAG", "getRandomQuotes: loading")
                     }
+
                     is Resource.Success -> {
                         Log.d("TAG", "getRandomQuotes: in success ")
                         _randomQuotes.value = it.data ?: emptyList()
@@ -73,6 +84,29 @@ class QuotesViewModel @Inject constructor(
 
             }.launchIn(viewModelScope)
 
+
+    }
+
+    fun getAuthorInfo(authorSlug: String) {
+
+        authorUseCases.getAuthorInfo(authorSlug).onEach { result ->
+
+            when (result) {
+                is Resource.Loading -> {
+                    Log.d("TAG", "getAuthorInfo: loading")
+                }
+
+                is Resource.Error -> {
+                    Log.d("TAG", "getAuthorInfo: error: ${result.message}")
+                }
+
+                is Resource.Success -> {
+                    Log.d("TAG", "getAuthorInfo: success")
+                    _authorInfo.value = result.data
+                }
+            }
+
+        }.launchIn(viewModelScope)
 
     }
 

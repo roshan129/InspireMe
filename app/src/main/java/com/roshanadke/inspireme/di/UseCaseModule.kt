@@ -1,6 +1,8 @@
 package com.roshanadke.inspireme.di
 
 import com.roshanadke.inspireme.domain.repository.QuotesRepository
+import com.roshanadke.inspireme.domain.use_case.AuthorUseCases
+import com.roshanadke.inspireme.domain.use_case.GetAuthorInfoUseCase
 import com.roshanadke.inspireme.domain.use_case.GetRandomQuotesUseCase
 import com.roshanadke.inspireme.domain.use_case.GetSingleRandomQuoteUseCase
 import com.roshanadke.inspireme.domain.use_case.QuotesUseCases
@@ -22,6 +24,16 @@ class UseCaseModule {
         return QuotesUseCases(
             GetSingleRandomQuoteUseCase(quotesRepository),
             GetRandomQuotesUseCase(quotesRepository)
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuthorUseCases(
+        quotesRepository: QuotesRepository
+    ): AuthorUseCases {
+        return AuthorUseCases(
+            GetAuthorInfoUseCase(quotesRepository),
         )
     }
 
