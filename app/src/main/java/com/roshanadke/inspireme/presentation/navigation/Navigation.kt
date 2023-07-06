@@ -17,20 +17,25 @@ fun Navigation() {
 
     NavHost(navController = navController, startDestination = Screen.QuoteMainScreen.route) {
         composable(Screen.QuoteMainScreen.route) {
-            //QuotesMainScreen(navController = navController)
-            AuthorDetailsScreen(author = "ovid")
+            QuotesMainScreen(navController = navController)
+            //AuthorDetailsScreen(author = "ovid")
         }
         composable(
-            Screen.AuthorDetailsScreen.route + "/{author}",
+            Screen.AuthorDetailsScreen.route + "/{authorSlug}/{authorName}",
             arguments = listOf(
-                navArgument("author") {
+                navArgument("authorSlug") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                },
+                navArgument("authorName") {
                     type = NavType.StringType
                     defaultValue = ""
                 }
             )
         ) { navBackStackEntry ->
-            val author = navBackStackEntry.arguments?.getString("author")
-            AuthorDetailsScreen(author = author)
+            val authorSlug = navBackStackEntry.arguments?.getString("authorSlug")
+            val authorName = navBackStackEntry.arguments?.getString("authorName")
+            AuthorDetailsScreen(authorSlug = authorSlug, authorName = authorName)
 
         }
     }

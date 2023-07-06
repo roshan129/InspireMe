@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.roshanadke.inspireme.common.Constants
 import com.roshanadke.inspireme.common.Resource
 import com.roshanadke.inspireme.domain.model.Author
+import com.roshanadke.inspireme.domain.model.AuthorWikipediaInfo
 import com.roshanadke.inspireme.domain.model.Quote
 import com.roshanadke.inspireme.domain.use_case.AuthorUseCases
 import com.roshanadke.inspireme.domain.use_case.GetSingleRandomQuoteUseCase
@@ -30,14 +31,25 @@ class QuotesViewModel @Inject constructor(
     private var _authorInfo: MutableState<Author?> = mutableStateOf(null)
     val authorInfo: State<Author?> = _authorInfo
 
+    private var _authorWikipediaInfo: MutableState<AuthorWikipediaInfo?> = mutableStateOf(null)
+    val authorWikipediaInfo: State<AuthorWikipediaInfo?> = _authorWikipediaInfo
+
     private var _randomQuotes: MutableState<List<Quote>> = mutableStateOf(emptyList())
     val randomQuotes: State<List<Quote>> = _randomQuotes
+
+    private var _selectedAuthorName: MutableState<String> = mutableStateOf("")
+    val selectedAuthorName: State<String> = _selectedAuthorName
 
     init {
         /*getSingleQuote()
         getRandomQuotes()*/
         //getRandomQuotes()
-        getAuthorInfo("ovid")
+        //getAuthorInfo("ovid")
+        //getAuthorWikipediaInfo("14th_Dalai_Lama")
+    }
+
+    fun changeSelectedAuthorName(authorName: String) {
+        _selectedAuthorName.value = authorName
     }
 
     fun getSingleQuote() {
@@ -103,6 +115,29 @@ class QuotesViewModel @Inject constructor(
                 is Resource.Success -> {
                     Log.d("TAG", "getAuthorInfo: success")
                     _authorInfo.value = result.data
+                }
+            }
+
+        }.launchIn(viewModelScope)
+
+    }
+
+    fun getAuthorWikipediaInfo(authorName: String) {
+
+        authorUseCases.getAuthorWikipediaInfo(authorName).onEach { result ->
+
+            when (result) {
+                is Resource.Loading -> {
+                    Log.d("TAG", "getAuthorInfo: loading")
+                }
+
+                is Resource.Error -> {
+                    Log.d("TAG", "getAuthorInfo: error: ${result.message}")
+                }
+
+                is Resource.Success -> {
+                    Log.d("TAG", "getAuthorInfo: success")
+                    _authorWikipediaInfo.value = result.data
                 }
             }
 

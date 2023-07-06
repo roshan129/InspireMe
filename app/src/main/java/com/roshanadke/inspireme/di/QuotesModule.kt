@@ -2,10 +2,12 @@ package com.roshanadke.inspireme.di
 
 import android.util.Log
 import com.roshanadke.inspireme.data.network.InspireMeApiService
+import com.roshanadke.inspireme.data.network.WikipediaAuthorInfoApiService
+import com.roshanadke.inspireme.data.repository.AuthorRepositoryImpl
 import com.roshanadke.inspireme.data.repository.QuotesRepositoryImpl
+import com.roshanadke.inspireme.domain.repository.AuthorRepository
 import com.roshanadke.inspireme.domain.repository.QuotesRepository
 import com.roshanadke.inspireme.domain.use_case.GetSingleRandomQuoteUseCase
-import com.roshanadke.inspireme.presentation.viewmodel.QuotesViewModel
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,6 +36,17 @@ class QuotesModule {
 
     @Provides
     @Singleton
+    fun getWikipediaAuthorInfoService(okHttpClient: OkHttpClient): WikipediaAuthorInfoApiService {
+        return Retrofit.Builder()
+            .baseUrl(WikipediaAuthorInfoApiService.BASE_WIKIPEDIA_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClient)
+            .build()
+            .create(WikipediaAuthorInfoApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun provideLoggingInterceptor(): HttpLoggingInterceptor {
         val logger = HttpLoggingInterceptor.Logger { message ->
             Log.d("RetrofitLog", message)
@@ -55,6 +68,15 @@ class QuotesModule {
     @Singleton
     fun getQuotesRepository(api: InspireMeApiService): QuotesRepository {
         return QuotesRepositoryImpl(api)
+    }
+
+    @Provides
+    @Singleton
+    fun getAuthorRepository(
+        api: InspireMeApiService,
+        wikiApi: WikipediaAuthorInfoApiService,
+    ): AuthorRepository {
+        return AuthorRepositoryImpl(api, wikiApi)
     }
 
     @Provides

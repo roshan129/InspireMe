@@ -12,6 +12,4 @@ interface QuotesRepository {
 
     fun getRandomQuotes(limit: Int): Flow<Resource<List<Quote>>>
 
-    fun getAuthorInfo(authorSlug: String): Flow<Resource<Author>>
-
 }

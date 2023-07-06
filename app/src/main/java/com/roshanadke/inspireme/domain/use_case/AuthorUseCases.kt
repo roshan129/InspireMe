@@ -1,5 +1,6 @@
 package com.roshanadke.inspireme.domain.use_case
 
 data class AuthorUseCases(
-  val getAuthorInfo: GetAuthorInfoUseCase
+  val getAuthorInfo: GetAuthorInfoUseCase,
+  val getAuthorWikipediaInfo: GetAuthorWikipediaInfoUseCase,
 )
