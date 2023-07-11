@@ -1,6 +1,7 @@
 package com.roshanadke.inspireme.presentation.screen
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -32,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.roshanadke.inspireme.presentation.ui.theme.BackGroundColor
@@ -41,10 +43,12 @@ import com.roshanadke.inspireme.presentation.viewmodel.QuotesViewModel
 @OptIn(ExperimentalCoilApi::class)
 @Composable
 fun AuthorDetailsScreen(
+    navController: NavController,
     quotesViewModel: QuotesViewModel = hiltViewModel(),
     authorSlug: String? = null,
     authorName: String? = null,
 ) {
+
 
     val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
 
@@ -80,7 +84,7 @@ fun AuthorDetailsScreen(
                     .padding(18.dp)
                     .size(48.dp)
                     .clickable {
-                               backPressedDispatcher.onBackPressedDispatcher
+                        navController.popBackStack()
                     },
 
             )

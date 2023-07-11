@@ -18,9 +18,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             InspireMeTheme {
 
-                val quotesViewModel: QuotesViewModel =  hiltViewModel()
+                /*val quotesViewModel: QuotesViewModel =  hiltViewModel()
                 val quote = quotesViewModel.singleQuote.value
-                val randomQuotes = quotesViewModel.randomQuotes.value
+                val randomQuotes = quotesViewModel.randomQuotes.value*/
 
 
                 Navigation()

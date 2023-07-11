@@ -35,7 +35,11 @@ fun Navigation() {
         ) { navBackStackEntry ->
             val authorSlug = navBackStackEntry.arguments?.getString("authorSlug")
             val authorName = navBackStackEntry.arguments?.getString("authorName")
-            AuthorDetailsScreen(authorSlug = authorSlug, authorName = authorName)
+            AuthorDetailsScreen(
+                navController = navController,
+                authorSlug = authorSlug,
+                authorName = authorName
+            )
 
         }
     }

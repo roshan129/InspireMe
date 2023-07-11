@@ -3,6 +3,7 @@ package com.roshanadke.inspireme.presentation.screen
 import android.util.Log
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,10 +30,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -54,12 +61,21 @@ fun QuotesMainScreen(
 ) {
 
 
-    //Text(text = "On Quotes screen")
+
+    val clipboardManager = LocalClipboardManager.current
 
     val quotes = quotesViewModel.randomQuotes.value
 
-    LaunchedEffect(Unit) {
-        quotesViewModel.getRandomQuotes()
+    var isInitialApiCallCompleted by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+
+    if(!isInitialApiCallCompleted) {
+        LaunchedEffect(Unit) {
+            quotesViewModel.getRandomQuotes()
+            isInitialApiCallCompleted = true
+        }
     }
 
 
@@ -123,9 +139,11 @@ fun QuotesMainScreen(
                                 onClick = {
                                     Log.d("TAG", "QuotesMainScreen: author name: ${quote.author} ")
                                     quotesViewModel.changeSelectedAuthorName(quote.author)
-                                    navController.navigate(
-                                        Screen.AuthorDetailsScreen.withArgs(quote.authorSlug, quote.author)
-                                    )
+                                        navController.navigate(
+                                            Screen.AuthorDetailsScreen.withArgs(quote.authorSlug, quote.author)
+                                        ) {
+                                            /*popUpTo(Screen.QuoteMainScreen.route) { inclusive = true }*/
+                                        }
                                 }
                             ) {
                                 Text(
@@ -173,12 +191,14 @@ fun QuotesMainScreen(
                                 modifier = Modifier.size(iconSize)
                             )
 
-                            Icon(
+                           /* Icon(
                                 imageVector = Icons.Default.Favorite,
                                 contentDescription = "Share",
                                 tint = Color.White,
                                 modifier = Modifier.size(iconSize)
-                            )
+                                ,
+
+                            )*/
 
                             Icon(
                                 imageVector = Icons.Default.Download,
@@ -192,6 +212,12 @@ fun QuotesMainScreen(
                                 contentDescription = "Share",
                                 tint = Color.White,
                                 modifier = Modifier.size(iconSize)
+                                    .clickable {
+                                        //copy quote to clipboard
+                                        clipboardManager.setText(
+                                            AnnotatedString(quote.content)
+                                        )
+                                    }
                             )
                         }
 
