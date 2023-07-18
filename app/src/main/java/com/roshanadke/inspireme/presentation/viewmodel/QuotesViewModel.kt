@@ -1,9 +1,13 @@
 package com.roshanadke.inspireme.presentation.viewmodel
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roshanadke.inspireme.common.Constants
@@ -146,4 +150,9 @@ class QuotesViewModel @Inject constructor(
     }
 
 
+}
+
+private fun checkPermission(context: Context): Boolean {
+    val result = ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    return result == PackageManager.PERMISSION_GRANTED
 }

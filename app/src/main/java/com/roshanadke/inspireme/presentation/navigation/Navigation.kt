@@ -1,5 +1,9 @@
 package com.roshanadke.inspireme.presentation.navigation
 
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -15,8 +19,16 @@ fun Navigation() {
 
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = Screen.QuoteMainScreen.route) {
-        composable(Screen.QuoteMainScreen.route) {
+
+    NavHost(
+        navController = navController,
+        startDestination = Screen.QuoteMainScreen.route,
+    ) {
+        composable(Screen.QuoteMainScreen.route,
+            /*enterTransition = {
+                slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left,animationSpec = tween(700))
+            }*/
+        ) {
             QuotesMainScreen(navController = navController)
             //AuthorDetailsScreen(author = "ovid")
         }
@@ -31,7 +43,14 @@ fun Navigation() {
                     type = NavType.StringType
                     defaultValue = ""
                 }
-            )
+            ),
+            enterTransition = {
+                slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left)
+            },
+            exitTransition = {
+                slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right)
+            }
+
         ) { navBackStackEntry ->
             val authorSlug = navBackStackEntry.arguments?.getString("authorSlug")
             val authorName = navBackStackEntry.arguments?.getString("authorName")
