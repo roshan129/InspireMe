@@ -1,8 +1,15 @@
 package com.roshanadke.inspireme.common
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
 import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
+import androidx.core.app.ShareCompat
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Random
@@ -40,4 +47,24 @@ fun generateUniqueRandomString(length: Int): String {
         .joinToString("")
 
     return "$timestamp$randomString"
+}
+
+fun shareBitmap(context: Context, bitmap: Bitmap, title: String? = null) {
+    val bitmapDrawable = BitmapDrawable(context.resources, bitmap)
+    val bitmapPath = MediaStore.Images.Media.insertImage(
+        context.contentResolver,
+        bitmapDrawable.bitmap,
+        "Quote",
+        null
+    )
+    val bitmapUri = Uri.parse(bitmapPath)
+
+    val shareIntent = ShareCompat.IntentBuilder.from(context as Activity)
+        .setType("image/jpeg")
+        .setStream(bitmapUri)
+        /*.setText(title) // You can include a title or message with the shared image*/
+        .createChooserIntent()
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+    context.startActivity(shareIntent)
 }

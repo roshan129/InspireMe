@@ -51,6 +51,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.roshanadke.inspireme.common.ComposableBitmapGenerator
 import com.roshanadke.inspireme.common.saveBitmapAsImage
+import com.roshanadke.inspireme.common.shareBitmap
 import com.roshanadke.inspireme.domain.model.Quote
 import com.roshanadke.inspireme.presentation.navigation.Screen
 import com.roshanadke.inspireme.presentation.ui.theme.BackGroundColor
@@ -83,6 +84,10 @@ fun QuotesMainScreen(
         mutableStateOf(false)
     }
 
+    var isShareButtonClicked by rememberSaveable {
+        mutableStateOf(false)
+    }
+
     val downloadQuote: MutableState<Quote?> = rememberSaveable {
         mutableStateOf(null)
     }
@@ -107,8 +112,21 @@ fun QuotesMainScreen(
                 catView
             })
 
+    }
 
-
+    if(isShareButtonClicked) {
+        AndroidView(
+            factory = { ctxt ->
+                val quoteView = ComposableBitmapGenerator(
+                    ctx = ctxt,
+                    quote = downloadQuote.value,
+                )
+                { bitmap ->
+                    shareBitmap(context, bitmap, "Share Quote")
+                }
+                quoteView
+            })
+        isShareButtonClicked = false
     }
 
     if(!isInitialApiCallCompleted) {
@@ -128,7 +146,9 @@ fun QuotesMainScreen(
     }
 
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = BackGroundColor)
     ) {
 
 
@@ -228,11 +248,17 @@ fun QuotesMainScreen(
 
                             val iconSize = 48.dp
 
+
                             Icon(
                                 imageVector = Icons.Default.Share,
                                 contentDescription = "Share",
                                 tint = Color.White,
-                                modifier = Modifier.size(iconSize)
+                                modifier = Modifier
+                                    .size(iconSize)
+                                    .clickable {
+                                        downloadQuote.value = quote
+                                        isShareButtonClicked = true
+                                    }
                             )
 
                        /*     Icon(
@@ -251,20 +277,20 @@ fun QuotesMainScreen(
 
                             Icon(
                                 imageVector = Icons.Default.Download,
-                                contentDescription = "Share",
+                                contentDescription = "Download",
                                 tint = Color.White,
                                 modifier = Modifier
                                     .size(iconSize)
                                     .padding()
                                     .clickable {
-                                        onDownloadImageClickFlag = true
                                         downloadQuote.value = quote
+                                        onDownloadImageClickFlag = true
                                     }
                             )
 
                             Icon(
                                 imageVector = Icons.Default.CopyAll,
-                                contentDescription = "Share",
+                                contentDescription = "Copy",
                                 tint = Color.White,
                                 modifier = Modifier
                                     .size(iconSize)
