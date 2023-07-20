@@ -1,29 +1,43 @@
 package com.roshanadke.inspireme.common
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import android.graphics.Bitmap
+import android.os.Environment
+import android.util.Log
+import java.io.File
+import java.io.FileOutputStream
+import java.util.Random
 
 
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-fun EnterAnimation(content: @Composable () -> Unit) {
-    AnimatedVisibility(
-        visible = true,
-        enter = slideInVertically(
-            initialOffsetY = { -40 }
-        ) + expandVertically(
-            expandFrom = Alignment.Top
-        ) + fadeIn(initialAlpha = 0.3f),
-        exit = slideOutVertically() + shrinkVertically() + fadeOut(),
-        content = content,
-        initiallyVisible = false
-    )
+fun saveBitmapAsImage(bitmap: Bitmap): Boolean {
+
+    val uniqueString = generateUniqueRandomString(7)
+    val filename = "quote_$uniqueString.jpg" // Change this to the desired filename
+
+    return try {
+        val file = File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
+            filename
+        )
+        val outputStream = FileOutputStream(file)
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+        outputStream.flush()
+        outputStream.close()
+        true
+    } catch (e: Exception) {
+        e.printStackTrace()
+        false
+    }
+}
+
+fun generateUniqueRandomString(length: Int): String {
+    val charPool : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+    val random = Random()
+
+    val timestamp = System.currentTimeMillis()
+    val randomString = (1..length)
+        .map { random.nextInt(charPool.size) }
+        .map(charPool::get)
+        .joinToString("")
+
+    return "$timestamp$randomString"
 }

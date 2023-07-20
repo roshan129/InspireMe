@@ -1,7 +1,8 @@
 package com.roshanadke.inspireme.presentation.screen
 
+import android.graphics.Bitmap
 import android.util.Log
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +31,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -44,8 +46,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.roshanadke.inspireme.common.ComposableBitmapGenerator
+import com.roshanadke.inspireme.common.saveBitmapAsImage
+import com.roshanadke.inspireme.domain.model.Quote
 import com.roshanadke.inspireme.presentation.navigation.Screen
 import com.roshanadke.inspireme.presentation.ui.theme.BackGroundColor
 import com.roshanadke.inspireme.presentation.ui.theme.QuoteTextColor
@@ -60,8 +66,7 @@ fun QuotesMainScreen(
     navController: NavController
 ) {
 
-
-
+    val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
 
     val quotes = quotesViewModel.randomQuotes.value
@@ -70,12 +75,51 @@ fun QuotesMainScreen(
         mutableStateOf(false)
     }
 
+    val bitmapState: MutableState<Bitmap?> = rememberSaveable {
+        mutableStateOf(null)
+    }
+
+    var onDownloadImageClickFlag by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    val downloadQuote: MutableState<Quote?> = rememberSaveable {
+        mutableStateOf(null)
+    }
+
+
+    if(onDownloadImageClickFlag) {
+        //download Image
+        onDownloadImageClickFlag = false
+        AndroidView(
+            factory = { ctxt ->
+                val catView = ComposableBitmapGenerator(
+                    ctx = ctxt,
+                    quote = downloadQuote.value,
+                )
+                { bitmap ->
+                    bitmapState.value = bitmap
+                    val isSaved = saveBitmapAsImage(bitmap)
+                    if(isSaved) {
+                        Toast.makeText(context, "The quote was saved to the gallery", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                catView
+            })
+
+
+
+    }
 
     if(!isInitialApiCallCompleted) {
         LaunchedEffect(Unit) {
             quotesViewModel.getRandomQuotes()
             isInitialApiCallCompleted = true
         }
+    }
+
+    bitmapState.value?.let {
+        Log.d("TAG", "QuotesMainScreen: bitmap recieved: $it ")
     }
 
 
@@ -191,11 +235,16 @@ fun QuotesMainScreen(
                                 modifier = Modifier.size(iconSize)
                             )
 
-                           /* Icon(
+                       /*     Icon(
                                 imageVector = Icons.Default.Favorite,
                                 contentDescription = "Share",
                                 tint = Color.White,
-                                modifier = Modifier.size(iconSize)
+                                modifier = Modifier.size(iconSize).
+                                        clickable {
+                                            navController.navigate(
+                                                Screen.QuotesDownloadScreen.withArgs(quote.content)
+                                            )
+                                        }
                                 ,
 
                             )*/
@@ -204,14 +253,21 @@ fun QuotesMainScreen(
                                 imageVector = Icons.Default.Download,
                                 contentDescription = "Share",
                                 tint = Color.White,
-                                modifier = Modifier.size(iconSize)
+                                modifier = Modifier
+                                    .size(iconSize)
+                                    .padding()
+                                    .clickable {
+                                        onDownloadImageClickFlag = true
+                                        downloadQuote.value = quote
+                                    }
                             )
 
                             Icon(
                                 imageVector = Icons.Default.CopyAll,
                                 contentDescription = "Share",
                                 tint = Color.White,
-                                modifier = Modifier.size(iconSize)
+                                modifier = Modifier
+                                    .size(iconSize)
                                     .clickable {
                                         //copy quote to clipboard
                                         clipboardManager.setText(
@@ -268,5 +324,9 @@ fun QuotesMainScreen(
 
     }
 
+
+}
+
+class Delegate {
 
 }

@@ -10,7 +10,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.roshanadke.inspireme.domain.model.Quote
 import com.roshanadke.inspireme.presentation.screen.AuthorDetailsScreen
+import com.roshanadke.inspireme.presentation.screen.QuotesDownloadScreen
 import com.roshanadke.inspireme.presentation.screen.QuotesMainScreen
 
 @Composable
@@ -30,6 +32,8 @@ fun Navigation() {
             }*/
         ) {
             QuotesMainScreen(navController = navController)
+            //val quoteObj = Quote("Abcd Temp", "", "sdfsdf dsfs  dsf sdf dsf sdf sdf sdf ", 0, emptyList())
+            //QuotesDownloadScreen(quote = quoteObj)
             //AuthorDetailsScreen(author = "ovid")
         }
         composable(
