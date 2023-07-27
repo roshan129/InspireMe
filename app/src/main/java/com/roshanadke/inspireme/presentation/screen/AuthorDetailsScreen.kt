@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,10 +51,8 @@ fun AuthorDetailsScreen(
     authorName: String? = null,
 ) {
 
+    val authorInfoState = quotesViewModel.authorDataState.value
 
-    val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
-
-    val authorInfo = quotesViewModel.authorInfo.value
     val authorWikipediaInfo = quotesViewModel.authorWikipediaInfo.value
 
     LaunchedEffect(Unit) {
@@ -64,85 +64,97 @@ fun AuthorDetailsScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                color = BackGroundColor
-            ),
-    ) {
 
-        Column(
-            modifier = Modifier.fillMaxSize()
+    Column {
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    color = BackGroundColor
+                ),
         ) {
 
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Back",
-                tint = Color.White,
-                modifier = Modifier
-                    .padding(18.dp)
-                    .size(48.dp)
-                    .clickable {
-                        navController.popBackStack()
-                    },
-
-            )
-
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier.fillMaxSize()
             ) {
 
-                //image url temp = "https://upload.wikimedia.org/wikipedia/commons/3/3e/Einstein_1921_by_F_Schmutzer_-_restoration.jpg"
-                Log.d("TAG", "AuthorDetailsScreen: image url: ${authorWikipediaInfo?.originalImage} ")
-                Image(
-                    painter = rememberImagePainter(
-                        data = authorWikipediaInfo?.originalImage?.source,
-                        builder = {
-                            crossfade(true)
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .padding(18.dp)
+                        .size(48.dp)
+                        .clickable {
+                            navController.popBackStack()
                         },
-                    ),
-                    contentDescription = "Author Profile",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(300.dp)
-                        .aspectRatio(1f)
-                        .clip(CircleShape)                       // clip to the circle shape
-                        .border(0.dp, Color.Gray, CircleShape)
 
-                )
-                Spacer(modifier = Modifier.height(30.dp))
+                    )
 
-                Text(
-                    text = authorInfo?.name ?: "",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 24.sp,
-                    color = Color.White,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
 
-                Spacer(modifier = Modifier.height(20.dp))
+                    //image url temp = "https://upload.wikimedia.org/wikipedia/commons/3/3e/Einstein_1921_by_F_Schmutzer_-_restoration.jpg"
+                    Log.d(
+                        "TAG",
+                        "AuthorDetailsScreen: image url: ${authorWikipediaInfo?.originalImage} "
+                    )
+                    Image(
+                        painter = rememberImagePainter(
+                            data = authorWikipediaInfo?.originalImage?.source,
+                            builder = {
+                                crossfade(true)
+                            },
+                        ),
+                        contentDescription = "Author Profile",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(300.dp)
+                            .aspectRatio(1f)
+                            .clip(CircleShape)                       // clip to the circle shape
+                            .border(0.dp, Color.Gray, CircleShape)
 
-                Text(
-                    text = authorInfo?.bio ?: "",
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 18.sp,
-                    color = Color.White,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp)
-                )
+                    )
+                    Spacer(modifier = Modifier.height(30.dp))
 
+                    Text(
+                        text = authorInfoState.authorInfo?.name ?: "",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 24.sp,
+                        color = Color.White,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Text(
+                        text = authorInfoState.authorInfo?.bio ?: "",
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 18.sp,
+                        color = Color.White,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp)
+                    )
+                }
             }
 
-
         }
+    }
 
-
+    if(authorInfoState.isLoading) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CircularProgressIndicator(color = Color.White)
+        }
     }
 
 

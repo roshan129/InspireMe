@@ -91,6 +91,10 @@ dependencies {
     //hilt navigation compose
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0-alpha01")
 
+    //for anchored draggable
+    implementation("androidx.compose.foundation:foundation:1.6.0-alpha01")
+
+
     //gson library
     implementation 'com.google.code.gson:gson:2.9.0'
 

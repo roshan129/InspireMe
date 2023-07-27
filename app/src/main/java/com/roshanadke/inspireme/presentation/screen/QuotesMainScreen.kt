@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -60,7 +61,6 @@ import com.roshanadke.inspireme.presentation.ui.theme.SlateGray
 import com.roshanadke.inspireme.presentation.viewmodel.QuotesViewModel
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuotesMainScreen(
     quotesViewModel: QuotesViewModel = hiltViewModel(),
@@ -70,7 +70,9 @@ fun QuotesMainScreen(
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
 
-    val quotes = quotesViewModel.randomQuotes.value
+    //val quotes = quotesViewModel.randomQuotes.value
+
+    val quotesListState = quotesViewModel.quotesListState.value
 
     var isInitialApiCallCompleted by rememberSaveable {
         mutableStateOf(false)
@@ -93,7 +95,7 @@ fun QuotesMainScreen(
     }
 
 
-    if(onDownloadImageClickFlag) {
+    if (onDownloadImageClickFlag) {
         //download Image
         onDownloadImageClickFlag = false
         AndroidView(
@@ -105,8 +107,12 @@ fun QuotesMainScreen(
                 { bitmap ->
                     bitmapState.value = bitmap
                     val isSaved = saveBitmapAsImage(bitmap)
-                    if(isSaved) {
-                        Toast.makeText(context, "The quote was saved to the gallery", Toast.LENGTH_SHORT).show()
+                    if (isSaved) {
+                        Toast.makeText(
+                            context,
+                            "The quote was saved to the gallery",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
                 catView
@@ -114,7 +120,7 @@ fun QuotesMainScreen(
 
     }
 
-    if(isShareButtonClicked) {
+    if (isShareButtonClicked) {
         AndroidView(
             factory = { ctxt ->
                 val quoteView = ComposableBitmapGenerator(
@@ -129,7 +135,7 @@ fun QuotesMainScreen(
         isShareButtonClicked = false
     }
 
-    if(!isInitialApiCallCompleted) {
+    if (!isInitialApiCallCompleted) {
         LaunchedEffect(Unit) {
             quotesViewModel.getRandomQuotes()
             isInitialApiCallCompleted = true
@@ -141,10 +147,56 @@ fun QuotesMainScreen(
     }
 
 
-    quotes.forEach {
-        Log.d("TAG", "QuotesMainScreen: ${it.author}")
-    }
+    /* quotes.forEach {
+         Log.d("TAG", "QuotesMainScreen: ${it.author}")
+     }*/
 
+
+    QuotesListScreen(
+        quotesListState.randomQuotesList,
+        onAuthorTabClicked = { quote ->
+            quotesViewModel.changeSelectedAuthorName(quote.author)
+            navController.navigate(
+                Screen.AuthorDetailsScreen.withArgs(quote.authorSlug, quote.author)
+            ) {
+                /*popUpTo(Screen.QuoteMainScreen.route) { inclusive = true }*/
+            }
+        },
+        shareButtonClicked = { quote ->
+            downloadQuote.value = quote
+            isShareButtonClicked = true
+        },
+        downloadButtonClicked = { quote ->
+            downloadQuote.value = quote
+            onDownloadImageClickFlag = true
+        },
+        copyButtonClicked = { quote ->
+            clipboardManager.setText(
+                AnnotatedString(quote.content)
+            )
+        },
+    )
+
+    if(quotesListState.isLoading) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CircularProgressIndicator(color = Color.White)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun QuotesListScreen(
+    quotes: List<Quote>,
+    onAuthorTabClicked: (quote: Quote) -> Unit,
+    shareButtonClicked: (quote: Quote) -> Unit,
+    downloadButtonClicked: (quote: Quote) -> Unit,
+    copyButtonClicked: (quote: Quote) -> Unit,
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -175,9 +227,11 @@ fun QuotesMainScreen(
                         verticalArrangement = Arrangement.Center,
 
                         ) {
-                        Spacer(modifier = Modifier
-                            .fillMaxWidth()
-                            .height(100.dp))
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(100.dp)
+                        )
                         Text(
                             text = quote.content,
                             fontSize = 28.sp,
@@ -186,7 +240,7 @@ fun QuotesMainScreen(
                             color = QuoteTextColor,
                             textAlign = TextAlign.Center
 
-                            )
+                        )
 
                         Box(
                             modifier = Modifier
@@ -202,12 +256,8 @@ fun QuotesMainScreen(
                                 colors = CardDefaults.cardColors(containerColor = SlateGray),
                                 onClick = {
                                     Log.d("TAG", "QuotesMainScreen: author name: ${quote.author} ")
-                                    quotesViewModel.changeSelectedAuthorName(quote.author)
-                                        navController.navigate(
-                                            Screen.AuthorDetailsScreen.withArgs(quote.authorSlug, quote.author)
-                                        ) {
-                                            /*popUpTo(Screen.QuoteMainScreen.route) { inclusive = true }*/
-                                        }
+                                    onAuthorTabClicked(quote)
+
                                 }
                             ) {
                                 Text(
@@ -256,24 +306,24 @@ fun QuotesMainScreen(
                                 modifier = Modifier
                                     .size(iconSize)
                                     .clickable {
-                                        downloadQuote.value = quote
-                                        isShareButtonClicked = true
+                                        shareButtonClicked(quote)
+
                                     }
                             )
 
-                       /*     Icon(
-                                imageVector = Icons.Default.Favorite,
-                                contentDescription = "Share",
-                                tint = Color.White,
-                                modifier = Modifier.size(iconSize).
-                                        clickable {
-                                            navController.navigate(
-                                                Screen.QuotesDownloadScreen.withArgs(quote.content)
-                                            )
-                                        }
-                                ,
+                            /*     Icon(
+                                     imageVector = Icons.Default.Favorite,
+                                     contentDescription = "Share",
+                                     tint = Color.White,
+                                     modifier = Modifier.size(iconSize).
+                                             clickable {
+                                                 navController.navigate(
+                                                     Screen.QuotesDownloadScreen.withArgs(quote.content)
+                                                 )
+                                             }
+                                     ,
 
-                            )*/
+                                 )*/
 
                             Icon(
                                 imageVector = Icons.Default.Download,
@@ -283,8 +333,8 @@ fun QuotesMainScreen(
                                     .size(iconSize)
                                     .padding()
                                     .clickable {
-                                        downloadQuote.value = quote
-                                        onDownloadImageClickFlag = true
+                                        downloadButtonClicked(quote)
+
                                     }
                             )
 
@@ -296,9 +346,7 @@ fun QuotesMainScreen(
                                     .size(iconSize)
                                     .clickable {
                                         //copy quote to clipboard
-                                        clipboardManager.setText(
-                                            AnnotatedString(quote.content)
-                                        )
+                                        copyButtonClicked(quote)
                                     }
                             )
                         }
@@ -349,10 +397,4 @@ fun QuotesMainScreen(
 
 
     }
-
-
-}
-
-class Delegate {
-
 }
