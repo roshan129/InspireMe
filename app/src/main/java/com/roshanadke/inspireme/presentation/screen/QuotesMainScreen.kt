@@ -28,13 +28,19 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -59,8 +65,10 @@ import com.roshanadke.inspireme.presentation.ui.theme.BackGroundColor
 import com.roshanadke.inspireme.presentation.ui.theme.QuoteTextColor
 import com.roshanadke.inspireme.presentation.ui.theme.SlateGray
 import com.roshanadke.inspireme.presentation.viewmodel.QuotesViewModel
+import kotlinx.coroutines.launch
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuotesMainScreen(
     quotesViewModel: QuotesViewModel = hiltViewModel(),
@@ -69,6 +77,9 @@ fun QuotesMainScreen(
 
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     //val quotes = quotesViewModel.randomQuotes.value
 
@@ -94,32 +105,6 @@ fun QuotesMainScreen(
         mutableStateOf(null)
     }
 
-
-    if (onDownloadImageClickFlag) {
-        //download Image
-        onDownloadImageClickFlag = false
-        AndroidView(
-            factory = { ctxt ->
-                val catView = ComposableBitmapGenerator(
-                    ctx = ctxt,
-                    quote = downloadQuote.value,
-                )
-                { bitmap ->
-                    bitmapState.value = bitmap
-                    val isSaved = saveBitmapAsImage(bitmap)
-                    if (isSaved) {
-                        Toast.makeText(
-                            context,
-                            "The quote was saved to the gallery",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-                catView
-            })
-
-    }
-
     if (isShareButtonClicked) {
         AndroidView(
             factory = { ctxt ->
@@ -142,55 +127,85 @@ fun QuotesMainScreen(
         }
     }
 
-    bitmapState.value?.let {
-        Log.d("TAG", "QuotesMainScreen: bitmap recieved: $it ")
+    if (onDownloadImageClickFlag) {
+        //download Image
+        onDownloadImageClickFlag = false
+        AndroidView(
+            factory = { ctxt ->
+                val catView = ComposableBitmapGenerator(
+                    ctx = ctxt,
+                    quote = downloadQuote.value,
+                )
+                { bitmap ->
+                    bitmapState.value = bitmap
+                    val isSaved = saveBitmapAsImage(bitmap)
+                    if (isSaved) {
+                        /*Toast.makeText(
+                            context,
+                            "The quote was saved to the gallery",
+                            Toast.LENGTH_SHORT
+                        ).show()*/
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = "The quote was saved to the gallery",
+                                withDismissAction = true
+                            )
+                        }
+                    }
+                }
+                catView
+            })
+
     }
 
 
-    /* quotes.forEach {
-         Log.d("TAG", "QuotesMainScreen: ${it.author}")
-     }*/
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(snackbarHostState)
+        },
+    ) {
 
+        QuotesListScreen(
+            modifier = Modifier.padding(it),
+            quotesListState.randomQuotesList,
+            onAuthorTabClicked = { quote ->
+                quotesViewModel.changeSelectedAuthorName(quote.author)
+                navController.navigate(
+                    Screen.AuthorDetailsScreen.withArgs(quote.authorSlug, quote.author)
+                )
+            },
+            shareButtonClicked = { quote ->
+                downloadQuote.value = quote
+                isShareButtonClicked = true
+            },
+            downloadButtonClicked = { quote ->
+                downloadQuote.value = quote
+                onDownloadImageClickFlag = true
+            },
+            copyButtonClicked = { quote ->
+                clipboardManager.setText(
+                    AnnotatedString(quote.content)
+                )
+            },
+        )
 
-    QuotesListScreen(
-        quotesListState.randomQuotesList,
-        onAuthorTabClicked = { quote ->
-            quotesViewModel.changeSelectedAuthorName(quote.author)
-            navController.navigate(
-                Screen.AuthorDetailsScreen.withArgs(quote.authorSlug, quote.author)
+        if(quotesListState.isLoading) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                /*popUpTo(Screen.QuoteMainScreen.route) { inclusive = true }*/
+                CircularProgressIndicator(color = Color.White)
             }
-        },
-        shareButtonClicked = { quote ->
-            downloadQuote.value = quote
-            isShareButtonClicked = true
-        },
-        downloadButtonClicked = { quote ->
-            downloadQuote.value = quote
-            onDownloadImageClickFlag = true
-        },
-        copyButtonClicked = { quote ->
-            clipboardManager.setText(
-                AnnotatedString(quote.content)
-            )
-        },
-    )
-
-    if(quotesListState.isLoading) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            CircularProgressIndicator(color = Color.White)
         }
     }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuotesListScreen(
+    modifier: Modifier,
     quotes: List<Quote>,
     onAuthorTabClicked: (quote: Quote) -> Unit,
     shareButtonClicked: (quote: Quote) -> Unit,
