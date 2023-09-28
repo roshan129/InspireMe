@@ -1,8 +1,5 @@
 package com.roshanadke.inspireme.presentation.screen
 
-import android.util.Log
-import androidx.activity.compose.BackHandler
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +36,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
+import com.roshanadke.inspireme.R
 import com.roshanadke.inspireme.presentation.ui.theme.BackGroundColor
 import com.roshanadke.inspireme.presentation.viewmodel.QuotesViewModel
 
@@ -51,7 +50,7 @@ fun AuthorDetailsScreen(
     authorName: String? = null,
 ) {
 
-    val authorInfoState = quotesViewModel.authorDataState.value
+    val authorInfoState = quotesViewModel.authorDataState.collectAsState().value
 
     val authorWikipediaInfo = quotesViewModel.authorWikipediaInfo.value
 
@@ -98,24 +97,24 @@ fun AuthorDetailsScreen(
                 ) {
 
                     //image url temp = "https://upload.wikimedia.org/wikipedia/commons/3/3e/Einstein_1921_by_F_Schmutzer_-_restoration.jpg"
-                    Log.d(
-                        "TAG",
-                        "AuthorDetailsScreen: image url: ${authorWikipediaInfo?.originalImage} "
-                    )
+
                     Image(
                         painter = rememberImagePainter(
                             data = authorWikipediaInfo?.originalImage?.source,
                             builder = {
                                 crossfade(true)
+                                placeholder(R.drawable.baseline_image_24)
                             },
                         ),
                         contentDescription = "Author Profile",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .size(300.dp)
+                            .padding(12.dp)
                             .aspectRatio(1f)
-                            .clip(CircleShape)                       // clip to the circle shape
-                            .border(0.dp, Color.Gray, CircleShape)
+                            .clip(CircleShape)
+                            .border(0.dp, Color.Gray, CircleShape),
+
 
                     )
                     Spacer(modifier = Modifier.height(30.dp))

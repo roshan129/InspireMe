@@ -59,6 +59,7 @@ import androidx.navigation.NavController
 import com.roshanadke.inspireme.common.ComposableBitmapGenerator
 import com.roshanadke.inspireme.common.saveBitmapAsImage
 import com.roshanadke.inspireme.common.shareBitmap
+import com.roshanadke.inspireme.common.showToast
 import com.roshanadke.inspireme.domain.model.Quote
 import com.roshanadke.inspireme.presentation.navigation.Screen
 import com.roshanadke.inspireme.presentation.ui.theme.BackGroundColor
@@ -140,11 +141,6 @@ fun QuotesMainScreen(
                     bitmapState.value = bitmap
                     val isSaved = saveBitmapAsImage(bitmap)
                     if (isSaved) {
-                        /*Toast.makeText(
-                            context,
-                            "The quote was saved to the gallery",
-                            Toast.LENGTH_SHORT
-                        ).show()*/
                         scope.launch {
                             snackbarHostState.showSnackbar(
                                 message = "The quote was saved to the gallery",
@@ -166,7 +162,9 @@ fun QuotesMainScreen(
     ) {
 
         QuotesListScreen(
-            modifier = Modifier.padding(it),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it),
             quotesListState.randomQuotesList,
             onAuthorTabClicked = { quote ->
                 quotesViewModel.changeSelectedAuthorName(quote.author)
@@ -186,6 +184,7 @@ fun QuotesMainScreen(
                 clipboardManager.setText(
                     AnnotatedString(quote.content)
                 )
+                context.showToast("Quote Copied")
             },
         )
 

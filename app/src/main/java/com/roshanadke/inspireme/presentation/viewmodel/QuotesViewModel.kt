@@ -20,6 +20,9 @@ import com.roshanadke.inspireme.domain.use_case.QuotesUseCases
 import com.roshanadke.inspireme.presentation.screen.AuthorDataState
 import com.roshanadke.inspireme.presentation.screen.QuotesListState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
@@ -48,8 +51,12 @@ class QuotesViewModel @Inject constructor(
     private var _quotesListState: MutableState<QuotesListState> = mutableStateOf(QuotesListState())
     var quotesListState: State<QuotesListState> = _quotesListState
 
-    private var _authorDataState: MutableState<AuthorDataState> = mutableStateOf(AuthorDataState())
-    var authorDataState: State<AuthorDataState> = _authorDataState
+  /*  private var _authorDataState: MutableState<AuthorDataState> = mutableStateOf(AuthorDataState())
+    var authorDataState: State<AuthorDataState> = _authorDataState*/
+
+    private val _authorDataState = MutableStateFlow(AuthorDataState())
+    val authorDataState = _authorDataState.asStateFlow()
+
 
     init {
         /*getSingleQuote()

@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.ShareCompat
 import java.io.File
 import java.io.FileOutputStream
@@ -22,7 +23,7 @@ fun saveBitmapAsImage(bitmap: Bitmap): Boolean {
 
     return try {
         val file = File(
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
             filename
         )
         val outputStream = FileOutputStream(file)
@@ -67,4 +68,8 @@ fun shareBitmap(context: Context, bitmap: Bitmap, title: String? = null) {
         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
     context.startActivity(shareIntent)
+}
+
+fun Context.showToast(message: String, duration: Int = Toast.LENGTH_SHORT) {
+    Toast.makeText(this, message, duration).show()
 }
