@@ -1,15 +1,18 @@
 package com.roshanadke.inspireme.data.repository
 
+import android.util.Log
 import com.roshanadke.inspireme.common.Resource
+import com.roshanadke.inspireme.data.dto.QuoteDto
+import com.roshanadke.inspireme.data.dto.author_quotes.AuthorQuoteListDto
 import com.roshanadke.inspireme.data.network.InspireMeApiService
 import com.roshanadke.inspireme.data.network.WikipediaAuthorInfoApiService
 import com.roshanadke.inspireme.domain.model.Author
 import com.roshanadke.inspireme.domain.model.AuthorWikipediaInfo
+import com.roshanadke.inspireme.domain.model.Quote
 import com.roshanadke.inspireme.domain.repository.AuthorRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.io.IOException
-import java.lang.Exception
 
 class AuthorRepositoryImpl(
     private val inspireMeApi: InspireMeApiService,
@@ -46,6 +49,18 @@ class AuthorRepositoryImpl(
         } catch (e: Exception) {
             emit(Resource.Error(message = "Some unexpected error occurred"))
         }
+    }
 
+    override fun getAuthorQuotes(authorSlug: String): Flow<Resource<List<Quote>>> = flow {
+        emit(Resource.Loading())
+        try {
+            val result = inspireMeApi.getAuthorQuotes(authorSlug)
+            val list = result.results?.map { it.toQuote() } ?: emptyList()
+            emit(Resource.Success(list))
+        } catch (e: IOException) {
+            emit(Resource.Error(message = "Please check your internet connection"))
+        } catch (e: Exception) {
+            emit(Resource.Error(message = "Some unexpected error occurred"))
+        }
     }
 }

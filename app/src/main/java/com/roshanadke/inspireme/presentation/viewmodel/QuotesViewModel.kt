@@ -1,30 +1,26 @@
 package com.roshanadke.inspireme.presentation.viewmodel
 
-import android.Manifest
-import android.content.Context
-import android.content.pm.PackageManager
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roshanadke.inspireme.common.Constants
 import com.roshanadke.inspireme.common.Resource
-import com.roshanadke.inspireme.domain.model.Author
 import com.roshanadke.inspireme.domain.model.AuthorWikipediaInfo
 import com.roshanadke.inspireme.domain.model.Quote
 import com.roshanadke.inspireme.domain.use_case.AuthorUseCases
 import com.roshanadke.inspireme.domain.use_case.QuotesUseCases
 import com.roshanadke.inspireme.presentation.screen.AuthorDataState
+import com.roshanadke.inspireme.presentation.screen.AuthorQuotesState
 import com.roshanadke.inspireme.presentation.screen.QuotesListState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
@@ -57,6 +53,8 @@ class QuotesViewModel @Inject constructor(
     private val _authorDataState = MutableStateFlow(AuthorDataState())
     val authorDataState = _authorDataState.asStateFlow()
 
+    private val _authorQuotesState = MutableStateFlow(AuthorQuotesState())
+    val authorQuotesState = _authorQuotesState.asStateFlow()
 
     init {
         /*getSingleQuote()
@@ -177,10 +175,31 @@ class QuotesViewModel @Inject constructor(
 
     }
 
+    fun getAuthorQuotes(authorSlug: String) {
+        authorUseCases.getAuthorQuotes(authorSlug).onEach {result ->
 
-}
+            when(result) {
+                is Resource.Error -> {
+                    _authorQuotesState.value = _authorQuotesState.value.copy(
+                        isLoading = false
+                    )
+                }
+                is Resource.Loading -> {
+                    _authorQuotesState.value = _authorQuotesState.value.copy(
+                        isLoading = true
+                    )
+                }
+                is Resource.Success -> {
+                    _authorQuotesState.value = _authorQuotesState.value.copy(
+                        authorQuotes = result.data ?: emptyList(),
+                        isLoading = false
+                    )
+                }
+            }
 
-private fun checkPermission(context: Context): Boolean {
-    val result = ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    return result == PackageManager.PERMISSION_GRANTED
+        }.launchIn(viewModelScope)
+
+    }
+
+
 }
