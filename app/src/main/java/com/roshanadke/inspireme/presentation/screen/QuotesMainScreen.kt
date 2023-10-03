@@ -256,7 +256,8 @@ fun QuotesListScreen(
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.fillMaxWidth(),
                             color = QuoteTextColor,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            lineHeight = 36.sp
 
                         )
 
