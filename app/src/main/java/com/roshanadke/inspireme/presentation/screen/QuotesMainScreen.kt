@@ -35,7 +35,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,6 +56,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.roshanadke.inspireme.common.ComposableBitmapGenerator
+import com.roshanadke.inspireme.common.MultipleEventsCutter
+import com.roshanadke.inspireme.common.get
 import com.roshanadke.inspireme.common.saveBitmapAsImage
 import com.roshanadke.inspireme.common.shareBitmap
 import com.roshanadke.inspireme.common.showToast
@@ -66,7 +67,9 @@ import com.roshanadke.inspireme.presentation.ui.theme.BackGroundColor
 import com.roshanadke.inspireme.presentation.ui.theme.QuoteTextColor
 import com.roshanadke.inspireme.presentation.ui.theme.SlateGray
 import com.roshanadke.inspireme.presentation.viewmodel.QuotesViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.LaunchedEffect as LaunchedEffect1
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -122,7 +125,7 @@ fun QuotesMainScreen(
     }
 
     if (!isInitialApiCallCompleted) {
-        LaunchedEffect(Unit) {
+        LaunchedEffect1(Unit) {
             quotesViewModel.getRandomQuotes()
             isInitialApiCallCompleted = true
         }
@@ -213,6 +216,7 @@ fun QuotesListScreen(
     copyButtonClicked: (quote: Quote) -> Unit,
 ) {
     val listState = rememberLazyListState()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -270,14 +274,16 @@ fun QuotesListScreen(
 
 
                         ) {
+                            val multipleEventsCutter = remember { MultipleEventsCutter.get() }
+
                             Card(
                                 shape = RoundedCornerShape(16.dp),
                                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                                 colors = CardDefaults.cardColors(containerColor = SlateGray),
                                 onClick = {
-                                    Log.d("TAG", "QuotesMainScreen: author name: ${quote.author} ")
-                                    onAuthorTabClicked(quote)
-
+                                    multipleEventsCutter.processEvent {
+                                        onAuthorTabClicked(quote)
+                                    }
                                 }
                             ) {
                                 Text(
