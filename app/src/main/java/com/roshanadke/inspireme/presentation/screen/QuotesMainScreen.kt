@@ -159,6 +159,7 @@ fun QuotesMainScreen(
         snackbarHost = {
             SnackbarHost(snackbarHostState)
         },
+        containerColor = BackGroundColor
     ) {
 
         QuotesListScreen(

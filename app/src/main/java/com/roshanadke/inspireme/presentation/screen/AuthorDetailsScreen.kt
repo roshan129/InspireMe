@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
@@ -130,12 +131,12 @@ fun AuthorDetailsScreen(
                                 contentDescription = "Author Profile",
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
-                                    .size(300.dp)
+                                    .fillMaxWidth()
+                                    /*.height(350.dp)*/
                                     .padding(12.dp)
                                     .aspectRatio(1f)
-                                    .clip(CircleShape)
-                                    .border(0.dp, Color.Gray, CircleShape),
-
+                                    .clip(RoundedCornerShape(22.dp))
+                                    .border(1.dp, Color.Gray),
 
                                 )
                             Spacer(modifier = Modifier.height(30.dp))

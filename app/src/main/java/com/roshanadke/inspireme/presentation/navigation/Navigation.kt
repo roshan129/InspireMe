@@ -21,13 +21,12 @@ fun Navigation() {
 
     val navController = rememberNavController()
 
-
     NavHost(
         navController = navController,
         startDestination = Screen.QuoteMainScreen.route,
     ) {
         composable(Screen.QuoteMainScreen.route,
-            /*enterTransition = {
+           /* enterTransition = {
                 slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left,animationSpec = tween(700))
             }*/
         ) {
