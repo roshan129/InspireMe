@@ -10,6 +10,8 @@ interface QuotesRepository {
 
     fun getSingleRandomQuote(): Flow<Resource<Quote>>
 
-    fun getRandomQuotes(limit: Int): Flow<Resource<List<Quote>>>
+    fun getRandomQuotes(limit: Int, tag: String): Flow<Resource<List<Quote>>>
+
+    fun getQuotesByCategory(tag: String): Flow<Resource<List<Quote>>>
 
 }

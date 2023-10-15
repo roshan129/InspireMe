@@ -16,24 +16,29 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CopyAll
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -56,12 +61,14 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.roshanadke.inspireme.common.ComposableBitmapGenerator
+import com.roshanadke.inspireme.common.Constants
 import com.roshanadke.inspireme.common.MultipleEventsCutter
 import com.roshanadke.inspireme.common.get
 import com.roshanadke.inspireme.common.saveBitmapAsImage
 import com.roshanadke.inspireme.common.shareBitmap
 import com.roshanadke.inspireme.common.showToast
 import com.roshanadke.inspireme.domain.model.Quote
+import com.roshanadke.inspireme.presentation.components.CategoryLayout
 import com.roshanadke.inspireme.presentation.navigation.Screen
 import com.roshanadke.inspireme.presentation.ui.theme.BackGroundColor
 import com.roshanadke.inspireme.presentation.ui.theme.QuoteTextColor
@@ -81,6 +88,9 @@ fun QuotesMainScreen(
 
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
+
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -190,6 +200,9 @@ fun QuotesMainScreen(
                 )
                 context.showToast("Quote Copied")
             },
+            onCategoryClicked = {
+                showBottomSheet = true
+            }
         )
 
         if (quotesListState.isLoading) {
@@ -199,6 +212,28 @@ fun QuotesMainScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 CircularProgressIndicator(color = Color.White)
+            }
+        }
+
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .fillMaxSize(),
+                onDismissRequest = {
+                    showBottomSheet = false
+                },
+                containerColor = BackGroundColor,
+                sheetState = sheetState
+            ) {
+
+                CategoryLayout(
+                    onCategoryCardClicked = { category ->
+
+                        quotesViewModel.changeCategory(category)
+                    }
+                )
+
             }
         }
     }
@@ -214,6 +249,7 @@ fun QuotesListScreen(
     shareButtonClicked: (quote: Quote) -> Unit,
     downloadButtonClicked: (quote: Quote) -> Unit,
     copyButtonClicked: (quote: Quote) -> Unit,
+    onCategoryClicked: () -> Unit
 ) {
     val listState = rememberLazyListState()
 
@@ -400,7 +436,11 @@ fun QuotesListScreen(
             Card(
                 modifier = Modifier
                     .padding(24.dp)
-                    .size(60.dp),
+                    .size(60.dp)
+                    .clickable {
+                        Log.d("TAG", "QuotesListScreen: clicked")
+                        onCategoryClicked()
+                    },
                 shape = RoundedCornerShape(16.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 colors = CardDefaults.cardColors(containerColor = SlateGray),
@@ -408,7 +448,7 @@ fun QuotesListScreen(
 
                 Icon(
                     imageVector = Icons.Default.AccountCircle,
-                    contentDescription = "Share",
+                    contentDescription = "Account",
                     tint = Color.White,
                     modifier = Modifier
                         .padding(12.dp)

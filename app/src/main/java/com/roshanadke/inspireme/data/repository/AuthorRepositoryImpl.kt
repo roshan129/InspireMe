@@ -34,7 +34,6 @@ class AuthorRepositoryImpl(
         } catch (e: Exception) {
             emit(Resource.Error(message = "Some unexpected error occurred"))
         }
-
     }
 
     override fun getAuthorWikipediaInfo(authorName: String): Flow<Resource<AuthorWikipediaInfo>> = flow {

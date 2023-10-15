@@ -17,7 +17,6 @@ class QuotesRepositoryImpl(
 ) : QuotesRepository {
     override fun getSingleRandomQuote(): Flow<Resource<Quote>> = flow {
         emit(Resource.Loading())
-
         try {
             val result = inspireMeApi.getSingleRandomQuote()
             emit(Resource.Success(result.toQuote()))
@@ -27,23 +26,28 @@ class QuotesRepositoryImpl(
         } catch (e: Exception) {
             emit(Resource.Error(message = "Some unexpected error occurred"))
         }
-
-
     }
 
-    override fun getRandomQuotes(limit: Int): Flow<Resource<List<Quote>>> = flow {
+    override fun getRandomQuotes(limit: Int, tag: String): Flow<Resource<List<Quote>>> = flow {
         emit(Resource.Loading())
-
         try {
-            val results = inspireMeApi.getRandomQuotes(limit)
+            val results = inspireMeApi.getRandomQuotes(limit, tag)
             emit(Resource.Success(results.map { it.toQuote() }))
         } catch (e: IOException) {
             emit(Resource.Error(message = "Please check your internet connection"))
         } catch (e: Exception) {
             emit(Resource.Error(message = "Some unexpected error occurred"))
         }
-
     }
 
-
+    override fun getQuotesByCategory(tag: String): Flow<Resource<List<Quote>>> = flow {
+        try {
+            val result = inspireMeApi.getQuotesByCategory(tag = tag)
+            emit(Resource.Success(result.map { it.toQuote() }))
+        } catch (e: IOException) {
+            emit(Resource.Error(message = "Please check your internet connection"))
+        } catch (e: Exception) {
+            emit(Resource.Error(message = "Some unexpected error occurred"))
+        }
+    }
 }

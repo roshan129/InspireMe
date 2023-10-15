@@ -10,8 +10,9 @@ import com.roshanadke.inspireme.common.Constants
 import com.roshanadke.inspireme.common.Resource
 import com.roshanadke.inspireme.domain.model.AuthorWikipediaInfo
 import com.roshanadke.inspireme.domain.model.Quote
+import com.roshanadke.inspireme.domain.repository.AuthorRepository
+import com.roshanadke.inspireme.domain.repository.QuotesRepository
 import com.roshanadke.inspireme.domain.use_case.AuthorUseCases
-import com.roshanadke.inspireme.domain.use_case.QuotesUseCases
 import com.roshanadke.inspireme.presentation.screen.AuthorDataState
 import com.roshanadke.inspireme.presentation.screen.AuthorQuotesState
 import com.roshanadke.inspireme.presentation.screen.QuotesListState
@@ -20,35 +21,28 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
 class QuotesViewModel @Inject constructor(
-    private val quotesUseCases: QuotesUseCases,
-    private val authorUseCases: AuthorUseCases,
+    private val quotesRepository: QuotesRepository,
+    private val authorRepository: AuthorRepository
 ) : ViewModel() {
 
     private var _singleQuote: MutableState<Quote?> = mutableStateOf(null)
     val singleQuote: State<Quote?> = _singleQuote
 
-   /* private var _authorInfo: MutableState<Author?> = mutableStateOf(null)
-    val authorInfo: State<Author?> = _authorInfo*/
+    private var _quotesCategory: MutableState<String> = mutableStateOf("")
+    val quotesCategory: State<String> = _quotesCategory
 
     private var _authorWikipediaInfo: MutableState<AuthorWikipediaInfo?> = mutableStateOf(null)
     val authorWikipediaInfo: State<AuthorWikipediaInfo?> = _authorWikipediaInfo
-
-    /*private var _randomQuotes: MutableState<List<Quote>> = mutableStateOf(emptyList())
-    val randomQuotes: State<List<Quote>> = _randomQuotes*/
 
     private var _selectedAuthorName: MutableState<String> = mutableStateOf("")
     val selectedAuthorName: State<String> = _selectedAuthorName
 
     private var _quotesListState: MutableState<QuotesListState> = mutableStateOf(QuotesListState())
     var quotesListState: State<QuotesListState> = _quotesListState
-
-  /*  private var _authorDataState: MutableState<AuthorDataState> = mutableStateOf(AuthorDataState())
-    var authorDataState: State<AuthorDataState> = _authorDataState*/
 
     private val _authorDataState = MutableStateFlow(AuthorDataState())
     val authorDataState = _authorDataState.asStateFlow()
@@ -68,9 +62,12 @@ class QuotesViewModel @Inject constructor(
         _selectedAuthorName.value = authorName
     }
 
-    fun getSingleQuote() {
+    fun changeCategory(tag: String) {
+        _quotesCategory.value = tag
+    }
 
-        quotesUseCases.getSingleRandomQuoteUseCase().onEach {
+    fun getSingleQuote() {
+        quotesRepository.getSingleRandomQuote().onEach {
             when (it) {
                 is Resource.Error -> {
                     Log.d("TAG", "getSingleQuote: error")
@@ -86,46 +83,45 @@ class QuotesViewModel @Inject constructor(
                     _singleQuote.value = it.data
                 }
             }
-
         }.launchIn(viewModelScope)
 
     }
 
     fun getRandomQuotes() {
-        quotesUseCases.getRandomQuotesUseCase(Constants.RANDOM_QUOTES_API_LIMIT)
-            .onEach {
-
-                when (it) {
-                    is Resource.Error -> {
-                        _quotesListState.value = _quotesListState.value.copy(
-                            isLoading = false
-                        )
-                        //show error message
-                    }
-
-                    is Resource.Loading -> {
-                        _quotesListState.value = _quotesListState.value.copy(
-                            isLoading = true
-                        )
-                    }
-
-                    is Resource.Success -> {
-                        _quotesListState.value = _quotesListState.value.copy(
-                            randomQuotesList = it.data ?: emptyList(),
-                            isLoading = false
-                        )
-                        //_randomQuotes.value = it.data ?: emptyList()
-                    }
+        quotesRepository.getRandomQuotes(
+            Constants.RANDOM_QUOTES_API_LIMIT,
+            quotesCategory.value
+        ).onEach {
+            when (it) {
+                is Resource.Error -> {
+                    _quotesListState.value = _quotesListState.value.copy(
+                        isLoading = false
+                    )
+                    //show error message
                 }
 
-            }.launchIn(viewModelScope)
+                is Resource.Loading -> {
+                    _quotesListState.value = _quotesListState.value.copy(
+                        isLoading = true
+                    )
+                }
+
+                is Resource.Success -> {
+                    _quotesListState.value = _quotesListState.value.copy(
+                        randomQuotesList = it.data ?: emptyList(),
+                        isLoading = false
+                    )
+                }
+            }
+
+        }.launchIn(viewModelScope)
 
 
     }
 
     fun getAuthorInfo(authorSlug: String) {
 
-        authorUseCases.getAuthorInfo(authorSlug).onEach { result ->
+        authorRepository.getAuthorInfo(authorSlug).onEach { result ->
 
             when (result) {
                 is Resource.Loading -> {
@@ -153,9 +149,7 @@ class QuotesViewModel @Inject constructor(
     }
 
     fun getAuthorWikipediaInfo(authorName: String) {
-
-        authorUseCases.getAuthorWikipediaInfo(authorName).onEach { result ->
-
+        authorRepository.getAuthorWikipediaInfo(authorName).onEach { result ->
             when (result) {
                 is Resource.Loading -> {
                     Log.d("TAG", "getAuthorInfo: loading")
@@ -176,19 +170,21 @@ class QuotesViewModel @Inject constructor(
     }
 
     fun getAuthorQuotes(authorSlug: String) {
-        authorUseCases.getAuthorQuotes(authorSlug).onEach {result ->
+        authorRepository.getAuthorQuotes(authorSlug).onEach { result ->
 
-            when(result) {
+            when (result) {
                 is Resource.Error -> {
                     _authorQuotesState.value = _authorQuotesState.value.copy(
                         isLoading = false
                     )
                 }
+
                 is Resource.Loading -> {
                     _authorQuotesState.value = _authorQuotesState.value.copy(
                         isLoading = true
                     )
                 }
+
                 is Resource.Success -> {
                     _authorQuotesState.value = _authorQuotesState.value.copy(
                         authorQuotes = result.data ?: emptyList(),
@@ -199,6 +195,27 @@ class QuotesViewModel @Inject constructor(
 
         }.launchIn(viewModelScope)
 
+    }
+
+    fun getQuotesByCategory(tag: String) {
+        quotesRepository.getQuotesByCategory(tag).onEach {
+            when (it) {
+                is Resource.Error -> {
+                    Log.d("TAG", "getQuotesByCategory: error ")
+
+                }
+
+                is Resource.Loading -> {
+                    Log.d("TAG", "getQuotesByCategory: loading ")
+
+                }
+
+                is Resource.Success -> {
+                    Log.d("TAG", "getQuotesByCategory: success ")
+                    Log.d("TAG", "getQuotesByCategory: category quotes: ${it.data?.size} ")
+                }
+            }
+        }.launchIn(viewModelScope)
     }
 
 
