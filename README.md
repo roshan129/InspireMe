@@ -23,7 +23,8 @@ Whether you're looking for a dose of motivation, encouragement, or simply some w
   - Kotlin Flows and Coroutines for asynchronous programming
 
 ## Screenshots
-![quotes_1](https://github.com/roshan129/InspireMe/assets/51310688/7d0998a1-4d12-46e1-b46b-6c0f9fe0d5de)
+![Screenshot_20231019_132105](https://github.com/roshan129/InspireMe/assets/51310688/87e1bd69-4e60-40cd-937c-9c2e0cb00459)
+
 
 
 
