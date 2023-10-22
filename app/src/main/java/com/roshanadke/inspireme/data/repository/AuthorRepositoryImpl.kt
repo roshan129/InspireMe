@@ -1,9 +1,6 @@
 package com.roshanadke.inspireme.data.repository
 
-import android.util.Log
 import com.roshanadke.inspireme.common.Resource
-import com.roshanadke.inspireme.data.dto.QuoteDto
-import com.roshanadke.inspireme.data.dto.author_quotes.AuthorQuoteListDto
 import com.roshanadke.inspireme.data.network.InspireMeApiService
 import com.roshanadke.inspireme.data.network.WikipediaAuthorInfoApiService
 import com.roshanadke.inspireme.domain.model.Author

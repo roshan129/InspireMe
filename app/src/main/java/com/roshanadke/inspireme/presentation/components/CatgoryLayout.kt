@@ -19,8 +19,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.roshanadke.inspireme.R
 import com.roshanadke.inspireme.presentation.ui.theme.BackGroundColor
 import com.roshanadke.inspireme.presentation.ui.theme.SlateGray
 
@@ -29,24 +32,7 @@ fun CategoryLayout(
     onCategoryCardClicked: (category: String) -> Unit
 ) {
 
-    val categoryList = listOf(
-        "General",
-        "Wisdom",
-        "Famous",
-        "Inspirational",
-        "Love",
-        "Friendship",
-        "Success",
-        "Motivational",
-        "Business",
-        "Life",
-        "Humorous",
-        "Science",
-        "Nature",
-        "Technology",
-        "Education",
-        "Happiness"
-    )
+    val categoryList = stringArrayResource(id = R.array.category_list).toList()
 
     Column(
         modifier = Modifier
@@ -61,7 +47,6 @@ fun CategoryLayout(
             onCategoryCardClicked = onCategoryCardClicked
 
         )
-
     }
 }
 

@@ -17,6 +17,7 @@ import com.roshanadke.inspireme.presentation.screen.AuthorDataState
 import com.roshanadke.inspireme.presentation.screen.AuthorQuotesState
 import com.roshanadke.inspireme.presentation.screen.QuotesListState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -50,6 +51,12 @@ class QuotesViewModel @Inject constructor(
     private val _authorQuotesState = MutableStateFlow(AuthorQuotesState())
     val authorQuotesState = _authorQuotesState.asStateFlow()
 
+    private val _pageNumber = MutableStateFlow(1)
+    val pageNumber = _pageNumber.asStateFlow()
+
+    private val _isLoadingMore = MutableStateFlow(false)
+    val isLoadingMore = _isLoadingMore.asStateFlow()
+
     init {
         /*getSingleQuote()
         getRandomQuotes()*/
@@ -64,33 +71,21 @@ class QuotesViewModel @Inject constructor(
 
     fun changeCategory(tag: String) {
         _quotesCategory.value = tag
+        _pageNumber.value = 0
     }
 
-    fun getSingleQuote() {
-        quotesRepository.getSingleRandomQuote().onEach {
-            when (it) {
-                is Resource.Error -> {
-                    Log.d("TAG", "getSingleQuote: error")
-                }
-
-                is Resource.Loading -> {
-                    Log.d("TAG", "getSingleQuote: loading")
-                }
-
-                is Resource.Success -> {
-                    Log.d("TAG", "getSingleQuote: in success ")
-                    Log.d("TAG", "getSingleQuote: in success: ${it.data?.author} ")
-                    _singleQuote.value = it.data
-                }
-            }
-        }.launchIn(viewModelScope)
-
+    fun loadMore() {
+        if(!isLoadingMore.value) {
+            _pageNumber.value++
+            loadMoreQuotes()
+        }
     }
 
-    fun getRandomQuotes() {
+    /*fun getRandomQuotes() {
         quotesRepository.getRandomQuotes(
             Constants.RANDOM_QUOTES_API_LIMIT,
-            quotesCategory.value
+            quotesCategory.value,
+            pageNumber.value
         ).onEach {
             when (it) {
                 is Resource.Error -> {
@@ -108,9 +103,69 @@ class QuotesViewModel @Inject constructor(
 
                 is Resource.Success -> {
                     _quotesListState.value = _quotesListState.value.copy(
+                        randomQuotesList = _quotesListState.value.randomQuotesList + (it.data ?: emptyList()),
+                        isLoading = false
+                    )
+                }
+            }
+
+        }.launchIn(viewModelScope)
+
+
+    }*/
+
+    fun getQuotes() {
+        quotesRepository.getQuotes(
+            Constants.RANDOM_QUOTES_API_LIMIT,
+            quotesCategory.value,
+            pageNumber.value
+        ).onEach {
+            when (it) {
+                is Resource.Error -> {
+                    _quotesListState.value = _quotesListState.value.copy(
+                        isLoading = false
+                    )
+                }
+
+                is Resource.Loading -> {
+                    _quotesListState.value = _quotesListState.value.copy(
+                        isLoading = true
+                    )
+                }
+
+                is Resource.Success -> {
+                    _quotesListState.value = _quotesListState.value.copy(
                         randomQuotesList = it.data ?: emptyList(),
                         isLoading = false
                     )
+                }
+            }
+
+        }.launchIn(viewModelScope)
+
+    }
+    private fun loadMoreQuotes() {
+        quotesRepository.getQuotes(
+            Constants.RANDOM_QUOTES_API_LIMIT,
+            quotesCategory.value,
+            pageNumber.value
+        ).onEach {
+            when (it) {
+                is Resource.Error -> {
+                    _isLoadingMore.value = false
+                }
+
+                is Resource.Loading -> {
+                    _isLoadingMore.value = true
+                }
+
+                is Resource.Success -> {
+                    _quotesListState.value = _quotesListState.value.copy(
+                        randomQuotesList = _quotesListState.value.randomQuotesList + (it.data ?: emptyList()),
+                        isLoading = false
+                    )
+                    _isLoadingMore.value = false
+
                 }
             }
 

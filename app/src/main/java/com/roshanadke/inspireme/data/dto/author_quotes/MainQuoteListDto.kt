@@ -1,9 +1,8 @@
 package com.roshanadke.inspireme.data.dto.author_quotes
 
-import com.google.gson.annotations.SerializedName
 import com.roshanadke.inspireme.data.dto.QuoteDto
 
-data class AuthorQuoteListDto(
+data class MainQuoteListDto(
     val count: Int?,
     val lastItemIndex: Int?,
     val page: Int?,

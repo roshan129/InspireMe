@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -136,7 +137,7 @@ fun QuotesMainScreen(
 
     if (!isInitialApiCallCompleted) {
         LaunchedEffect1(Unit) {
-            quotesViewModel.getRandomQuotes()
+            quotesViewModel.getQuotes()
             isInitialApiCallCompleted = true
         }
     }
@@ -202,6 +203,9 @@ fun QuotesMainScreen(
             },
             onCategoryClicked = {
                 showBottomSheet = true
+            },
+            loadMoreQuotes = {
+                quotesViewModel.loadMore()
             }
         )
 
@@ -229,8 +233,8 @@ fun QuotesMainScreen(
 
                 CategoryLayout(
                     onCategoryCardClicked = { category ->
-
                         quotesViewModel.changeCategory(category)
+                        //load new category quotes
                     }
                 )
 
@@ -249,7 +253,8 @@ fun QuotesListScreen(
     shareButtonClicked: (quote: Quote) -> Unit,
     downloadButtonClicked: (quote: Quote) -> Unit,
     copyButtonClicked: (quote: Quote) -> Unit,
-    onCategoryClicked: () -> Unit
+    onCategoryClicked: () -> Unit,
+    loadMoreQuotes: () -> Unit,
 ) {
     val listState = rememberLazyListState()
 
@@ -268,7 +273,13 @@ fun QuotesListScreen(
 
         ) {
 
-            items(quotes) { quote ->
+            itemsIndexed(quotes) { index, quote ->
+
+                Log.d("TAG", "QuotesListScreen: index: $index")
+
+                if(index == quotes.size - 1) {
+                    loadMoreQuotes()
+                }
 
                 Column(
                     modifier = Modifier

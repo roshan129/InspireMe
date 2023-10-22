@@ -1,3 +1,24 @@
 <resources>
     <string name="app_name">InspireMe</string>
+
+    <array name="category_list">
+        <item>General</item>
+        <item>Wisdom</item>
+        <item>Famous</item>
+        <item>Inspirational</item>
+        <item>Love</item>
+        <item>Friendship</item>
+        <item>Success</item>
+        <item>Motivational</item>
+        <item>Business</item>
+        <item>Life</item>
+        <item>Humorous</item>
+        <item>Science</item>
+        <item>Nature</item>
+        <item>Technology</item>
+        <item>Education</item>
+        <item>Happiness</item>
+    </array>
+
+
 </resources>
