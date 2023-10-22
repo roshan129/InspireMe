@@ -14,6 +14,4 @@ interface QuotesRepository {
 
     fun getQuotes(limit: Int, tag: String, pageNumber: Int): Flow<Resource<List<Quote>>>
 
-    fun getQuotesByCategory(tag: String): Flow<Resource<List<Quote>>>
-
 }

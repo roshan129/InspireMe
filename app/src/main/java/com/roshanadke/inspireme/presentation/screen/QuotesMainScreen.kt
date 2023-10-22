@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -53,6 +55,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -61,6 +64,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.roshanadke.inspireme.R
 import com.roshanadke.inspireme.common.ComposableBitmapGenerator
 import com.roshanadke.inspireme.common.Constants
 import com.roshanadke.inspireme.common.MultipleEventsCutter
@@ -99,6 +103,7 @@ fun QuotesMainScreen(
     //val quotes = quotesViewModel.randomQuotes.value
 
     val quotesListState = quotesViewModel.quotesListState.value
+    val selectedCategory = quotesViewModel.quotesCategory
 
     var isInitialApiCallCompleted by rememberSaveable {
         mutableStateOf(false)
@@ -143,7 +148,6 @@ fun QuotesMainScreen(
     }
 
     if (onDownloadImageClickFlag) {
-        //download Image
         onDownloadImageClickFlag = false
         AndroidView(
             factory = { ctxt ->
@@ -181,6 +185,7 @@ fun QuotesMainScreen(
                 .fillMaxSize()
                 .padding(it),
             quotesListState.randomQuotesList,
+            selectedCategory.value,
             onAuthorTabClicked = { quote ->
                 quotesViewModel.changeSelectedAuthorName(quote.author)
                 navController.navigate(
@@ -209,6 +214,55 @@ fun QuotesMainScreen(
             }
         )
 
+        Box(
+            modifier = Modifier
+                .padding(top = 0.dp)
+                .fillMaxSize(),
+            contentAlignment = Alignment.TopStart
+        ) {
+
+            Card(
+                modifier = Modifier
+                    .padding(24.dp)
+                    .wrapContentWidth()
+                    .clickable {
+                        showBottomSheet = true
+                    },
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                colors = CardDefaults.cardColors(containerColor = SlateGray),
+            ) {
+                val category = if(selectedCategory.value.isEmpty()) "General" else selectedCategory.value
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val widthAround = 14.dp
+                    Spacer(modifier = Modifier.width(widthAround))
+                    Icon(
+                        painter = painterResource(id = R.drawable.icon_baseline_apps),
+                        contentDescription = "apps icon",
+                        tint = Color.White
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = category,
+                        color = Color.White,
+                        modifier = Modifier.padding(
+                            top = widthAround,
+                            bottom = widthAround,
+                            end = widthAround
+                        ),
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 12.sp,
+                    )
+                }
+
+            }
+
+        }
+
+
         if (quotesListState.isLoading) {
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -233,8 +287,13 @@ fun QuotesMainScreen(
 
                 CategoryLayout(
                     onCategoryCardClicked = { category ->
-                        quotesViewModel.changeCategory(category)
-                        //load new category quotes
+                        if(category.equals("General")) {
+                            quotesViewModel.changeCategory("")
+                        } else {
+                            quotesViewModel.changeCategory(category)
+                        }
+                        showBottomSheet = false
+                        quotesViewModel.getQuotes()
                     }
                 )
 
@@ -249,6 +308,7 @@ fun QuotesMainScreen(
 fun QuotesListScreen(
     modifier: Modifier,
     quotes: List<Quote>,
+    selectedCategory: String,
     onAuthorTabClicked: (quote: Quote) -> Unit,
     shareButtonClicked: (quote: Quote) -> Unit,
     downloadButtonClicked: (quote: Quote) -> Unit,
@@ -277,7 +337,7 @@ fun QuotesListScreen(
 
                 Log.d("TAG", "QuotesListScreen: index: $index")
 
-                if(index == quotes.size - 1) {
+                if (index == quotes.size - 1) {
                     loadMoreQuotes()
                 }
 
@@ -436,41 +496,7 @@ fun QuotesListScreen(
 
 
 
-        Box(
-            modifier = Modifier
-                .padding(top = 0.dp)
-                .fillMaxSize(),
-            /*.border(color = Color.White, width = 2.dp),*/
-            contentAlignment = Alignment.TopStart
-        ) {
 
-            Card(
-                modifier = Modifier
-                    .padding(24.dp)
-                    .size(60.dp)
-                    .clickable {
-                        Log.d("TAG", "QuotesListScreen: clicked")
-                        onCategoryClicked()
-                    },
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                colors = CardDefaults.cardColors(containerColor = SlateGray),
-            ) {
-
-                Icon(
-                    imageVector = Icons.Default.AccountCircle,
-                    contentDescription = "Account",
-                    tint = Color.White,
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .size(42.dp)
-
-                )
-
-
-            }
-
-        }
 
 
     }

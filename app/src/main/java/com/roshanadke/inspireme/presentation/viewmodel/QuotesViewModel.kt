@@ -71,7 +71,7 @@ class QuotesViewModel @Inject constructor(
 
     fun changeCategory(tag: String) {
         _quotesCategory.value = tag
-        _pageNumber.value = 0
+        _pageNumber.value = 1
     }
 
     fun loadMore() {
@@ -250,27 +250,6 @@ class QuotesViewModel @Inject constructor(
 
         }.launchIn(viewModelScope)
 
-    }
-
-    fun getQuotesByCategory(tag: String) {
-        quotesRepository.getQuotesByCategory(tag).onEach {
-            when (it) {
-                is Resource.Error -> {
-                    Log.d("TAG", "getQuotesByCategory: error ")
-
-                }
-
-                is Resource.Loading -> {
-                    Log.d("TAG", "getQuotesByCategory: loading ")
-
-                }
-
-                is Resource.Success -> {
-                    Log.d("TAG", "getQuotesByCategory: success ")
-                    Log.d("TAG", "getQuotesByCategory: category quotes: ${it.data?.size} ")
-                }
-            }
-        }.launchIn(viewModelScope)
     }
 
 

@@ -24,13 +24,21 @@ interface InspireMeApiService {
         @Query("tags") tag: String
     ): List<QuoteDto>
 
-    @GET("/quotes/")
+    /*@GET("/quotes/")
     suspend fun getQuotes(
         @Query("limit") limit: Int,
         @Query("tags") tag: String,
         @Query("page") page: Int = 1,
         @Query("maxLength") maxLength: Int = 300,
-    ): MainQuoteListDto
+    ): MainQuoteListDto*/
+
+    @GET("/quotes/random")
+    suspend fun getQuotes(
+        @Query("limit") limit: Int,
+        @Query("tags") tag: String,
+        @Query("page") page: Int = 1,
+        @Query("maxLength") maxLength: Int = 300,
+    ): List<QuoteDto>
 
 
     @GET("/authors")
@@ -42,11 +50,5 @@ interface InspireMeApiService {
     suspend fun getAuthorQuotes(
         @Query("author") authorSlug: String
     ): MainQuoteListDto
-
-    @GET("/quotes/random")
-    suspend fun getQuotesByCategory(
-        @Query("limit") limit: Int = Constants.RANDOM_QUOTES_API_LIMIT,
-        @Query("tags") tag: String
-    ): List<QuoteDto>
 
 }

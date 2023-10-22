@@ -43,9 +43,10 @@ class QuotesRepositoryImpl(
     override fun getQuotes(limit: Int, tag: String, pageNumber: Int): Flow<Resource<List<Quote>>> = flow {
         emit(Resource.Loading())
         try {
-            val result = inspireMeApi.getQuotes(limit, tag, pageNumber)
-            val list = result.results?.map { it.toQuote() } ?: emptyList()
-            emit(Resource.Success(list))
+            val results = inspireMeApi.getQuotes(limit, tag, pageNumber)
+            /*val list = result.results?.map { it.toQuote() } ?: emptyList()
+            emit(Resource.Success(list))*/
+            emit(Resource.Success(results.map { it.toQuote() }))
         } catch (e: IOException) {
             emit(Resource.Error(message = "Please check your internet connection"))
         } catch (e: Exception) {
@@ -53,14 +54,4 @@ class QuotesRepositoryImpl(
         }
     }
 
-    override fun getQuotesByCategory(tag: String): Flow<Resource<List<Quote>>> = flow {
-        try {
-            val result = inspireMeApi.getQuotesByCategory(tag = tag)
-            emit(Resource.Success(result.map { it.toQuote() }))
-        } catch (e: IOException) {
-            emit(Resource.Error(message = "Please check your internet connection"))
-        } catch (e: Exception) {
-            emit(Resource.Error(message = "Some unexpected error occurred"))
-        }
-    }
 }
