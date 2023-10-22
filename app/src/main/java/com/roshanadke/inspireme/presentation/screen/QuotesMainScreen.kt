@@ -74,6 +74,7 @@ import com.roshanadke.inspireme.common.shareBitmap
 import com.roshanadke.inspireme.common.showToast
 import com.roshanadke.inspireme.domain.model.Quote
 import com.roshanadke.inspireme.presentation.components.CategoryLayout
+import com.roshanadke.inspireme.presentation.components.QuotesListScreen
 import com.roshanadke.inspireme.presentation.navigation.Screen
 import com.roshanadke.inspireme.presentation.ui.theme.BackGroundColor
 import com.roshanadke.inspireme.presentation.ui.theme.QuoteTextColor
@@ -185,7 +186,6 @@ fun QuotesMainScreen(
                 .fillMaxSize()
                 .padding(it),
             quotesListState.randomQuotesList,
-            selectedCategory.value,
             onAuthorTabClicked = { quote ->
                 quotesViewModel.changeSelectedAuthorName(quote.author)
                 navController.navigate(
@@ -205,9 +205,6 @@ fun QuotesMainScreen(
                     AnnotatedString(quote.content)
                 )
                 context.showToast("Quote Copied")
-            },
-            onCategoryClicked = {
-                showBottomSheet = true
             },
             loadMoreQuotes = {
                 quotesViewModel.loadMore()
@@ -232,7 +229,8 @@ fun QuotesMainScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 colors = CardDefaults.cardColors(containerColor = SlateGray),
             ) {
-                val category = if(selectedCategory.value.isEmpty()) "General" else selectedCategory.value
+                val category =
+                    if (selectedCategory.value.isEmpty()) "General" else selectedCategory.value
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically
@@ -287,7 +285,7 @@ fun QuotesMainScreen(
 
                 CategoryLayout(
                     onCategoryCardClicked = { category ->
-                        if(category.equals("General")) {
+                        if (category.equals("General")) {
                             quotesViewModel.changeCategory("")
                         } else {
                             quotesViewModel.changeCategory(category)
@@ -303,202 +301,5 @@ fun QuotesMainScreen(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
-@Composable
-fun QuotesListScreen(
-    modifier: Modifier,
-    quotes: List<Quote>,
-    selectedCategory: String,
-    onAuthorTabClicked: (quote: Quote) -> Unit,
-    shareButtonClicked: (quote: Quote) -> Unit,
-    downloadButtonClicked: (quote: Quote) -> Unit,
-    copyButtonClicked: (quote: Quote) -> Unit,
-    onCategoryClicked: () -> Unit,
-    loadMoreQuotes: () -> Unit,
-) {
-    val listState = rememberLazyListState()
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = BackGroundColor)
-
-    ) {
-        LazyColumn(
-            modifier = Modifier.background(
-                color = BackGroundColor
-            ),
-            state = listState,
-            flingBehavior = rememberSnapFlingBehavior(lazyListState = listState)
-
-        ) {
-
-            itemsIndexed(quotes) { index, quote ->
-
-                Log.d("TAG", "QuotesListScreen: index: $index")
-
-                if (index == quotes.size - 1) {
-                    loadMoreQuotes()
-                }
-
-                Column(
-                    modifier = Modifier
-                        .fillParentMaxHeight()
-                        .padding(start = 0.dp, top = 0.dp, end = 0.dp),
-
-                    verticalArrangement = Arrangement.Center,
-                ) {
-
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(12.dp),
-                        /*.border(color = Color.White, width = 2.dp),*/
-                        verticalArrangement = Arrangement.Center,
-
-                        ) {
-                        Spacer(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(100.dp)
-                        )
-                        Text(
-                            text = quote.content,
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.fillMaxWidth(),
-                            color = QuoteTextColor,
-                            textAlign = TextAlign.Center,
-                            lineHeight = 36.sp
-
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 48.dp),
-                            contentAlignment = Alignment.CenterEnd
-
-
-                        ) {
-                            val multipleEventsCutter = remember { MultipleEventsCutter.get() }
-
-                            Card(
-                                shape = RoundedCornerShape(16.dp),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                                colors = CardDefaults.cardColors(containerColor = SlateGray),
-                                onClick = {
-                                    multipleEventsCutter.processEvent {
-                                        onAuthorTabClicked(quote)
-                                    }
-                                }
-                            ) {
-                                Text(
-                                    text = "- ${quote.author}",
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Normal,
-                                    modifier = Modifier
-                                        .padding(
-                                            start = 24.dp,
-                                            end = 24.dp,
-                                            top = 18.dp,
-                                            bottom = 18.dp
-                                        ),
-                                    textAlign = TextAlign.End,
-                                    color = QuoteTextColor,
-                                )
-                            }
-                        }
-
-
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .padding(top = 12.dp, bottom = 24.dp)
-                            .fillMaxWidth(),
-                        /*.weight(0.4f),*/
-                        /*.border(color = Color.White, width = 2.dp),*/
-                        contentAlignment = Alignment.BottomCenter
-                    ) {
-
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceAround,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(24.dp)
-                        ) {
-
-                            val iconSize = 48.dp
-
-
-                            Icon(
-                                imageVector = Icons.Default.Share,
-                                contentDescription = "Share",
-                                tint = Color.White,
-                                modifier = Modifier
-                                    .size(iconSize)
-                                    .clickable {
-                                        shareButtonClicked(quote)
-
-                                    }
-                            )
-
-                            /*     Icon(
-                                     imageVector = Icons.Default.Favorite,
-                                     contentDescription = "Share",
-                                     tint = Color.White,
-                                     modifier = Modifier.size(iconSize).
-                                             clickable {
-                                                 navController.navigate(
-                                                     Screen.QuotesDownloadScreen.withArgs(quote.content)
-                                                 )
-                                             }
-                                     ,
-
-                                 )*/
-
-                            Icon(
-                                imageVector = Icons.Default.Download,
-                                contentDescription = "Download",
-                                tint = Color.White,
-                                modifier = Modifier
-                                    .size(iconSize)
-                                    .padding()
-                                    .clickable {
-                                        downloadButtonClicked(quote)
-
-                                    }
-                            )
-
-                            Icon(
-                                imageVector = Icons.Default.CopyAll,
-                                contentDescription = "Copy",
-                                tint = Color.White,
-                                modifier = Modifier
-                                    .size(iconSize)
-                                    .clickable {
-                                        //copy quote to clipboard
-                                        copyButtonClicked(quote)
-                                    }
-                            )
-                        }
-
-                    }
-
-
-                }
-
-
-            }
-        }
-
-
-
-
-
-
-
-    }
-}
 
