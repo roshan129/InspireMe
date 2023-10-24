@@ -1,5 +1,6 @@
 package com.roshanadke.inspireme.presentation.screen
 
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -34,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -43,10 +45,15 @@ import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.roshanadke.inspireme.R
+import com.roshanadke.inspireme.common.UiText
+import com.roshanadke.inspireme.common.showToast
 import com.roshanadke.inspireme.presentation.components.AuthorQuoteCard
 import com.roshanadke.inspireme.presentation.ui.theme.BackGroundColor
 import com.roshanadke.inspireme.presentation.ui.theme.SlateGray
 import com.roshanadke.inspireme.presentation.viewmodel.QuotesViewModel
+import com.roshanadke.inspireme.presentation.viewmodel.QuotesViewModel.UiEvent
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.collectLatest
 
 
 @OptIn(ExperimentalCoilApi::class, ExperimentalFoundationApi::class)
@@ -63,6 +70,8 @@ fun AuthorDetailsScreen(
 
     val authorWikipediaInfo = quotesViewModel.authorWikipediaInfo.value
 
+    val context = LocalContext.current
+
     LaunchedEffect(Unit) {
         authorSlug?.let {
             quotesViewModel.getAuthorInfo(authorSlug)
@@ -70,6 +79,13 @@ fun AuthorDetailsScreen(
         }
         authorName?.let {
             quotesViewModel.getAuthorWikipediaInfo(authorName)
+        }
+        quotesViewModel.eventFlow.buffer(1).collectLatest {event ->
+            when(event) {
+                is UiEvent.ShowSnackbar -> {
+                    context.showToast(event.message.asString(context), Toast.LENGTH_SHORT)
+                }
+            }
         }
     }
 

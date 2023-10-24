@@ -6,8 +6,10 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.roshanadke.inspireme.R
 import com.roshanadke.inspireme.common.Constants
 import com.roshanadke.inspireme.common.Resource
+import com.roshanadke.inspireme.common.UiText
 import com.roshanadke.inspireme.domain.model.AuthorWikipediaInfo
 import com.roshanadke.inspireme.domain.model.Quote
 import com.roshanadke.inspireme.domain.repository.AuthorRepository
@@ -16,7 +18,9 @@ import com.roshanadke.inspireme.presentation.screen.AuthorDataState
 import com.roshanadke.inspireme.presentation.screen.AuthorQuotesState
 import com.roshanadke.inspireme.presentation.screen.QuotesListState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -55,13 +59,13 @@ class QuotesViewModel @Inject constructor(
     private val _isLoadingMore = MutableStateFlow(false)
     val isLoadingMore = _isLoadingMore.asStateFlow()
 
-    init {
-        /*getSingleQuote()
-        getRandomQuotes()*/
-        //getRandomQuotes()
-        //getAuthorInfo("ovid")
-        //getAuthorWikipediaInfo("14th_Dalai_Lama")
+    private val _eventFlow = MutableSharedFlow<UiEvent>()
+    val eventFlow = _eventFlow.asSharedFlow()
+
+    sealed class UiEvent {
+        data class ShowSnackbar(val message: UiText): UiEvent()
     }
+
 
     fun changeSelectedAuthorName(authorName: String) {
         _selectedAuthorName.value = authorName
@@ -79,38 +83,6 @@ class QuotesViewModel @Inject constructor(
         }
     }
 
-    /*fun getRandomQuotes() {
-        quotesRepository.getRandomQuotes(
-            Constants.RANDOM_QUOTES_API_LIMIT,
-            quotesCategory.value,
-            pageNumber.value
-        ).onEach {
-            when (it) {
-                is Resource.Error -> {
-                    _quotesListState.value = _quotesListState.value.copy(
-                        isLoading = false
-                    )
-                    //show error message
-                }
-
-                is Resource.Loading -> {
-                    _quotesListState.value = _quotesListState.value.copy(
-                        isLoading = true
-                    )
-                }
-
-                is Resource.Success -> {
-                    _quotesListState.value = _quotesListState.value.copy(
-                        randomQuotesList = _quotesListState.value.randomQuotesList + (it.data ?: emptyList()),
-                        isLoading = false
-                    )
-                }
-            }
-
-        }.launchIn(viewModelScope)
-
-
-    }*/
 
     fun getQuotes() {
         quotesRepository.getQuotes(
@@ -187,12 +159,22 @@ class QuotesViewModel @Inject constructor(
                     _authorDataState.value = _authorDataState.value.copy(
                         isLoading = false
                     )
+                    _eventFlow.emit(
+                        UiEvent.ShowSnackbar(UiText.StringResource(
+                            R.string.something_went_wrong
+                        ))
+                    )
                 }
 
                 is Resource.Success -> {
                     _authorDataState.value = _authorDataState.value.copy(
                         authorInfo = result.data,
                         isLoading = false
+                    )
+                    _eventFlow.emit(
+                        UiEvent.ShowSnackbar(UiText.StringResource(
+                            R.string.something_went_wrong
+                        ))
                     )
                 }
             }
@@ -205,21 +187,19 @@ class QuotesViewModel @Inject constructor(
         authorRepository.getAuthorWikipediaInfo(authorName).onEach { result ->
             when (result) {
                 is Resource.Loading -> {
-                    Log.d("TAG", "getAuthorInfo: loading")
+                    //do nothing
                 }
 
                 is Resource.Error -> {
-                    Log.d("TAG", "getAuthorInfo: error: ${result.message}")
+                    //do nothing
                 }
 
                 is Resource.Success -> {
-                    Log.d("TAG", "getAuthorInfo: success")
                     _authorWikipediaInfo.value = result.data
                 }
             }
 
         }.launchIn(viewModelScope)
-
     }
 
     fun getAuthorQuotes(authorSlug: String) {
