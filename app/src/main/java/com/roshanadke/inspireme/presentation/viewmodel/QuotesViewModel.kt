@@ -12,12 +12,10 @@ import com.roshanadke.inspireme.domain.model.AuthorWikipediaInfo
 import com.roshanadke.inspireme.domain.model.Quote
 import com.roshanadke.inspireme.domain.repository.AuthorRepository
 import com.roshanadke.inspireme.domain.repository.QuotesRepository
-import com.roshanadke.inspireme.domain.use_case.AuthorUseCases
 import com.roshanadke.inspireme.presentation.screen.AuthorDataState
 import com.roshanadke.inspireme.presentation.screen.AuthorQuotesState
 import com.roshanadke.inspireme.presentation.screen.QuotesListState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn

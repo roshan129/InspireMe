@@ -7,7 +7,6 @@ import com.roshanadke.inspireme.data.repository.AuthorRepositoryImpl
 import com.roshanadke.inspireme.data.repository.QuotesRepositoryImpl
 import com.roshanadke.inspireme.domain.repository.AuthorRepository
 import com.roshanadke.inspireme.domain.repository.QuotesRepository
-import com.roshanadke.inspireme.domain.use_case.GetSingleRandomQuoteUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -79,10 +78,5 @@ class QuotesModule {
         return AuthorRepositoryImpl(api, wikiApi)
     }
 
-    @Provides
-    @Singleton
-    fun getSingleRandomQuote(repository: QuotesRepository): GetSingleRandomQuoteUseCase {
-        return GetSingleRandomQuoteUseCase(repository)
-    }
 
 }

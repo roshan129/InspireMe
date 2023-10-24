@@ -76,7 +76,7 @@ fun QuotesListScreen(
 
                 Log.d("TAG", "QuotesListScreen: index: $index")
 
-                if (index == quotes.size - 1) {
+                if (index == quotes.size - 5) {
                     loadMoreQuotes()
                 }
 
