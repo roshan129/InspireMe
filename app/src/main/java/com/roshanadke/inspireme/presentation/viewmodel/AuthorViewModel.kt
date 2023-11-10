@@ -72,12 +72,6 @@ class AuthorViewModel @Inject constructor(
                         authorInfo = result.data,
                         isLoading = false
                     )
-                    _eventFlow.emit(
-                        QuotesViewModel.UiEvent.ShowSnackbar(
-                            UiText.StringResource(
-                            R.string.something_went_wrong
-                        ))
-                    )
                 }
             }
 
