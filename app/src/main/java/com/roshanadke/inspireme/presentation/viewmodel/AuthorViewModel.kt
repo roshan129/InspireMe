@@ -8,14 +8,10 @@ import androidx.lifecycle.viewModelScope
 import com.roshanadke.inspireme.R
 import com.roshanadke.inspireme.common.Resource
 import com.roshanadke.inspireme.common.UiText
-import com.roshanadke.inspireme.data.network.InspireMeApiService
-import com.roshanadke.inspireme.data.network.WikipediaAuthorInfoApiService
-import com.roshanadke.inspireme.data.repository.AuthorRepositoryImpl
 import com.roshanadke.inspireme.domain.model.AuthorWikipediaInfo
 import com.roshanadke.inspireme.domain.repository.AuthorRepository
 import com.roshanadke.inspireme.presentation.screen.AuthorDataState
 import com.roshanadke.inspireme.presentation.screen.AuthorQuotesState
-import dagger.Provides
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +20,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
-import javax.inject.Singleton
 
 @HiltViewModel
 class AuthorViewModel @Inject constructor(

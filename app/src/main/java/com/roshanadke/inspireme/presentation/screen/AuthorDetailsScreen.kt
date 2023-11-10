@@ -1,5 +1,8 @@
+@file:OptIn(ExperimentalCoilApi::class)
+
 package com.roshanadke.inspireme.presentation.screen
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -8,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -53,6 +58,8 @@ import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.roshanadke.inspireme.R
+import com.roshanadke.inspireme.common.rememberWindowSize
+import com.roshanadke.inspireme.domain.model.Quote
 import com.roshanadke.inspireme.presentation.components.AuthorQuoteCard
 import com.roshanadke.inspireme.presentation.ui.theme.BackGroundColor
 import com.roshanadke.inspireme.presentation.ui.theme.LightRed
@@ -83,8 +90,10 @@ fun AuthorDetailsScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
+    val windowSizeInfo = rememberWindowSize()
+
     LaunchedEffect(Unit) {
-        if(!isApiCalledOnce) {
+        if (!isApiCalledOnce) {
             isApiCalledOnce = true
             authorSlug?.let {
                 authorViewModel.getAuthorInfo(authorSlug)
@@ -105,12 +114,14 @@ fun AuthorDetailsScreen(
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackBarHostState) {
-            Snackbar(
-                containerColor = LightRed,
-                snackbarData = it
-            )
-        } }
+        snackbarHost = {
+            SnackbarHost(snackBarHostState) {
+                Snackbar(
+                    containerColor = LightRed,
+                    snackbarData = it
+                )
+            }
+        }
     ) {
         LazyColumn(
             Modifier
@@ -150,57 +161,49 @@ fun AuthorDetailsScreen(
                             modifier = Modifier.fillMaxSize(),
                         ) {
 
+                            if (windowSizeInfo.isCompactWidth()) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
 
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
+                                    //image url temp = "https://upload.wikimedia.org/wikipedia/commons/3/3e/Einstein_1921_by_F_Schmutzer_-_restoration.jpg"
 
-                                //image url temp = "https://upload.wikimedia.org/wikipedia/commons/3/3e/Einstein_1921_by_F_Schmutzer_-_restoration.jpg"
+                                    AuthorImage(
+                                        imageSource = authorWikipediaInfo?.originalImage?.source,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(12.dp)
+                                            .aspectRatio(1f)
+                                            .clip(RoundedCornerShape(22.dp))
+                                            .border(1.dp, Color.Gray)
+                                    )
 
-                                Image(
-                                    painter = rememberImagePainter(
-                                        data = authorWikipediaInfo?.originalImage?.source,
-                                        builder = {
-                                            crossfade(true)
-                                            placeholder(R.drawable.baseline_image_24)
-                                        },
-                                    ),
-                                    contentDescription = "Author Profile",
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        /*.height(350.dp)*/
-                                        .padding(12.dp)
-                                        .aspectRatio(1f)
-                                        .clip(RoundedCornerShape(22.dp))
-                                        .border(1.dp, Color.Gray)
+                                    Spacer(modifier = Modifier.height(30.dp))
 
-                                )
-                                Spacer(modifier = Modifier.height(30.dp))
+                                    AuthorName(
+                                        authorInfoState.authorInfo?.name,
+                                        Modifier.fillMaxWidth()
+                                    )
 
-                                Text(
-                                    text = authorInfoState.authorInfo?.name ?: "",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 24.sp,
-                                    color = Color.White,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
+                                    Spacer(modifier = Modifier.height(20.dp))
 
-                                Spacer(modifier = Modifier.height(20.dp))
+                                    AuthorBio(
+                                        authorBio = authorInfoState.authorInfo?.bio,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(12.dp)
+                                    )
+                                }
 
-                                Text(
-                                    text = authorInfoState.authorInfo?.bio ?: "",
-                                    fontWeight = FontWeight.Normal,
-                                    fontSize = 22.sp,
-                                    color = Color.White,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(12.dp)
+                            } else {
+                                LandScapeAuthorDetails(
+                                    imageSource = authorWikipediaInfo?.originalImage?.source,
+                                    authorName = authorInfoState.authorInfo?.name,
+                                    authorBio = authorInfoState.authorInfo?.bio
                                 )
                             }
+
 
                         }
 
@@ -210,37 +213,10 @@ fun AuthorDetailsScreen(
             }
 
             item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            bottom = 4.dp
-                        ),
-                    colors = CardDefaults.cardColors(containerColor = BackGroundColor),
-                ) {
-                    Text(
-                        text = "$authorName Quotes",
-                        color = Color.White,
-                        modifier = Modifier
-                            .padding(
-                                24.dp
-                            ),
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
+                AuthorTitleCard(authorName = authorName)
             }
 
-
-            items(authorQuotesState.authorQuotes) { quote ->
-
-                AuthorQuoteCard(
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .fillMaxWidth(),
-                    quote = quote
-                )
-            }
+            authorQuotesList(authorQuotesState.authorQuotes)
 
             item {
                 Spacer(modifier = Modifier.height(24.dp))
@@ -259,4 +235,126 @@ fun AuthorDetailsScreen(
     }
 
 
+}
+
+@Composable
+fun LandScapeAuthorDetails(
+    imageSource: String?,
+    authorName: String?,
+    authorBio: String?
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+    ) {
+
+        Box(modifier = Modifier.weight(0.8f)) {
+            AuthorImage(
+                imageSource = imageSource,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
+                    .aspectRatio(1f)
+                    .clip(RoundedCornerShape(22.dp))
+                    .border(1.dp, Color.Gray)
+            )
+        }
+
+        Box(modifier = Modifier.weight(1f)) {
+            Column {
+                Spacer(modifier = Modifier.height(30.dp))
+
+                AuthorName(
+                    authorName,
+                    Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                AuthorBio(
+                    authorBio = authorBio,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp)
+                )
+            }
+        }
+
+    }
+}
+
+@Composable
+fun AuthorImage(imageSource: String?, modifier: Modifier) {
+    Image(
+        painter = rememberImagePainter(
+            data = imageSource,
+            builder = {
+                crossfade(true)
+                placeholder(R.drawable.baseline_image_24)
+            },
+        ),
+        contentDescription = "Author Profile",
+        contentScale = ContentScale.Crop,
+        modifier = modifier
+
+    )
+}
+
+@Composable
+fun AuthorName(name: String?, modifier: Modifier) {
+    Text(
+        text = name ?: "",
+        fontWeight = FontWeight.Bold,
+        fontSize = 24.sp,
+        color = Color.White,
+        textAlign = TextAlign.Center,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun AuthorBio(authorBio: String?, modifier: Modifier) {
+    Text(
+        text = authorBio ?: "",
+        fontWeight = FontWeight.Normal,
+        fontSize = 22.sp,
+        color = Color.White,
+        textAlign = TextAlign.Center,
+        modifier = modifier
+    )
+}
+
+fun LazyListScope.authorQuotesList(authorQuotes: List<Quote>) {
+    items(authorQuotes) { quote ->
+        AuthorQuoteCard(
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxWidth(),
+            quote = quote
+        )
+    }
+}
+
+@Composable
+fun AuthorTitleCard(authorName: String?) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                bottom = 4.dp
+            ),
+        colors = CardDefaults.cardColors(containerColor = BackGroundColor),
+    ) {
+        Text(
+            text = "$authorName Quotes",
+            color = Color.White,
+            modifier = Modifier
+                .padding(
+                    24.dp
+                ),
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+        )
+    }
 }
