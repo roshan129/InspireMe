@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roshanadke.inspireme.R
 import com.roshanadke.inspireme.common.Resource
+import com.roshanadke.inspireme.common.UiEvent
 import com.roshanadke.inspireme.common.UiText
 import com.roshanadke.inspireme.domain.model.AuthorWikipediaInfo
 import com.roshanadke.inspireme.domain.repository.AuthorRepository
@@ -36,7 +37,7 @@ class AuthorViewModel @Inject constructor(
     private var _authorWikipediaInfo: MutableState<AuthorWikipediaInfo?> = mutableStateOf(null)
     val authorWikipediaInfo: State<AuthorWikipediaInfo?> = _authorWikipediaInfo
 
-    private val _eventFlow = MutableSharedFlow<QuotesViewModel.UiEvent>()
+    private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
 
@@ -55,7 +56,7 @@ class AuthorViewModel @Inject constructor(
                         isLoading = false
                     )
                     _eventFlow.emit(
-                        QuotesViewModel.UiEvent.ShowSnackbar(
+                        UiEvent.ShowSnackbar(
                             UiText.StringResource(
                             R.string.something_went_wrong
                         ))
@@ -83,7 +84,12 @@ class AuthorViewModel @Inject constructor(
                 }
 
                 is Resource.Error -> {
-                    //do nothing
+                    _eventFlow.emit(
+                        UiEvent.ShowSnackbar(
+                            UiText.StringResource(
+                                R.string.something_went_wrong
+                            ))
+                    )
                 }
 
                 is Resource.Success -> {
@@ -102,6 +108,12 @@ class AuthorViewModel @Inject constructor(
                 is Resource.Error -> {
                     _authorQuotesState.value = _authorQuotesState.value.copy(
                         isLoading = false
+                    )
+                    _eventFlow.emit(
+                        UiEvent.ShowSnackbar(
+                            UiText.StringResource(
+                                R.string.something_went_wrong
+                            ))
                     )
                 }
 

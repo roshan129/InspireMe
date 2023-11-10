@@ -58,13 +58,13 @@ import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.roshanadke.inspireme.R
+import com.roshanadke.inspireme.common.UiEvent
 import com.roshanadke.inspireme.common.rememberWindowSize
 import com.roshanadke.inspireme.domain.model.Quote
 import com.roshanadke.inspireme.presentation.components.AuthorQuoteCard
 import com.roshanadke.inspireme.presentation.ui.theme.BackGroundColor
 import com.roshanadke.inspireme.presentation.ui.theme.LightRed
 import com.roshanadke.inspireme.presentation.viewmodel.AuthorViewModel
-import com.roshanadke.inspireme.presentation.viewmodel.QuotesViewModel.UiEvent
 import kotlinx.coroutines.flow.collectLatest
 
 

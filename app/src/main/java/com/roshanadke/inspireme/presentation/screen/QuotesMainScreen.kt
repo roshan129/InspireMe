@@ -68,6 +68,7 @@ import com.roshanadke.inspireme.R
 import com.roshanadke.inspireme.common.ComposableBitmapGenerator
 import com.roshanadke.inspireme.common.Constants
 import com.roshanadke.inspireme.common.MultipleEventsCutter
+import com.roshanadke.inspireme.common.UiEvent
 import com.roshanadke.inspireme.common.get
 import com.roshanadke.inspireme.common.saveBitmapAsImage
 import com.roshanadke.inspireme.common.shareBitmap
@@ -79,8 +80,10 @@ import com.roshanadke.inspireme.presentation.navigation.Screen
 import com.roshanadke.inspireme.presentation.ui.theme.BackGroundColor
 import com.roshanadke.inspireme.presentation.ui.theme.QuoteTextColor
 import com.roshanadke.inspireme.presentation.ui.theme.SlateGray
+import com.roshanadke.inspireme.presentation.viewmodel.AuthorViewModel
 import com.roshanadke.inspireme.presentation.viewmodel.QuotesViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.LaunchedEffect as LaunchedEffect1
 
@@ -145,6 +148,15 @@ fun QuotesMainScreen(
         LaunchedEffect1(Unit) {
             quotesViewModel.getQuotes()
             isInitialApiCallCompleted = true
+
+            quotesViewModel.eventFlow.collectLatest { event ->
+                when (event) {
+                    is UiEvent.ShowSnackbar -> {
+                        snackbarHostState.showSnackbar(event.message.asString(context))
+                    }
+                }
+            }
+
         }
     }
 

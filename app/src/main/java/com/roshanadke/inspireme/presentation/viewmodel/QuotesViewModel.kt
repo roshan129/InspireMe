@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.roshanadke.inspireme.R
 import com.roshanadke.inspireme.common.Constants
 import com.roshanadke.inspireme.common.Resource
+import com.roshanadke.inspireme.common.UiEvent
 import com.roshanadke.inspireme.common.UiText
 import com.roshanadke.inspireme.domain.model.AuthorWikipediaInfo
 import com.roshanadke.inspireme.domain.model.Quote
@@ -50,12 +51,8 @@ class QuotesViewModel @Inject constructor(
     private val _isLoadingMore = MutableStateFlow(false)
     val isLoadingMore = _isLoadingMore.asStateFlow()
 
-    private val _eventFlow = MutableSharedFlow<QuotesViewModel.UiEvent>()
+    private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
-
-    sealed class UiEvent {
-        data class ShowSnackbar(val message: UiText): UiEvent()
-    }
 
 
     fun changeSelectedAuthorName(authorName: String) {
@@ -85,6 +82,12 @@ class QuotesViewModel @Inject constructor(
                 is Resource.Error -> {
                     _quotesListState.value = _quotesListState.value.copy(
                         isLoading = false
+                    )
+                    _eventFlow.emit(
+                        UiEvent.ShowSnackbar(
+                            UiText.StringResource(
+                                R.string.something_went_wrong
+                            ))
                     )
                 }
 
