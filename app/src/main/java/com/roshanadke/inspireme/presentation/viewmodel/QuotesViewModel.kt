@@ -38,20 +38,11 @@ class QuotesViewModel @Inject constructor(
     private var _quotesCategory: MutableState<String> = mutableStateOf("")
     val quotesCategory: State<String> = _quotesCategory
 
-    private var _authorWikipediaInfo: MutableState<AuthorWikipediaInfo?> = mutableStateOf(null)
-    val authorWikipediaInfo: State<AuthorWikipediaInfo?> = _authorWikipediaInfo
-
     private var _selectedAuthorName: MutableState<String> = mutableStateOf("")
     val selectedAuthorName: State<String> = _selectedAuthorName
 
     private var _quotesListState: MutableState<QuotesListState> = mutableStateOf(QuotesListState())
     var quotesListState: State<QuotesListState> = _quotesListState
-
-    private val _authorDataState = MutableStateFlow(AuthorDataState())
-    val authorDataState = _authorDataState.asStateFlow()
-
-    private val _authorQuotesState = MutableStateFlow(AuthorQuotesState())
-    val authorQuotesState = _authorQuotesState.asStateFlow()
 
     private val _pageNumber = MutableStateFlow(1)
     val pageNumber = _pageNumber.asStateFlow()
@@ -59,7 +50,7 @@ class QuotesViewModel @Inject constructor(
     private val _isLoadingMore = MutableStateFlow(false)
     val isLoadingMore = _isLoadingMore.asStateFlow()
 
-    private val _eventFlow = MutableSharedFlow<UiEvent>()
+    private val _eventFlow = MutableSharedFlow<QuotesViewModel.UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
     sealed class UiEvent {
@@ -144,91 +135,6 @@ class QuotesViewModel @Inject constructor(
 
     }
 
-    fun getAuthorInfo(authorSlug: String) {
-
-        authorRepository.getAuthorInfo(authorSlug).onEach { result ->
-
-            when (result) {
-                is Resource.Loading -> {
-                    _authorDataState.value = _authorDataState.value.copy(
-                        isLoading = true
-                    )
-                }
-
-                is Resource.Error -> {
-                    _authorDataState.value = _authorDataState.value.copy(
-                        isLoading = false
-                    )
-                    _eventFlow.emit(
-                        UiEvent.ShowSnackbar(UiText.StringResource(
-                            R.string.something_went_wrong
-                        ))
-                    )
-                }
-
-                is Resource.Success -> {
-                    _authorDataState.value = _authorDataState.value.copy(
-                        authorInfo = result.data,
-                        isLoading = false
-                    )
-                    _eventFlow.emit(
-                        UiEvent.ShowSnackbar(UiText.StringResource(
-                            R.string.something_went_wrong
-                        ))
-                    )
-                }
-            }
-
-        }.launchIn(viewModelScope)
-
-    }
-
-    fun getAuthorWikipediaInfo(authorName: String) {
-        authorRepository.getAuthorWikipediaInfo(authorName).onEach { result ->
-            when (result) {
-                is Resource.Loading -> {
-                    //do nothing
-                }
-
-                is Resource.Error -> {
-                    //do nothing
-                }
-
-                is Resource.Success -> {
-                    _authorWikipediaInfo.value = result.data
-                }
-            }
-
-        }.launchIn(viewModelScope)
-    }
-
-    fun getAuthorQuotes(authorSlug: String) {
-        authorRepository.getAuthorQuotes(authorSlug).onEach { result ->
-
-            when (result) {
-                is Resource.Error -> {
-                    _authorQuotesState.value = _authorQuotesState.value.copy(
-                        isLoading = false
-                    )
-                }
-
-                is Resource.Loading -> {
-                    _authorQuotesState.value = _authorQuotesState.value.copy(
-                        isLoading = true
-                    )
-                }
-
-                is Resource.Success -> {
-                    _authorQuotesState.value = _authorQuotesState.value.copy(
-                        authorQuotes = result.data ?: emptyList(),
-                        isLoading = false
-                    )
-                }
-            }
-
-        }.launchIn(viewModelScope)
-
-    }
 
 
 }

@@ -13,3 +13,7 @@ val Pink40 = Color(0xFF7D5260)
 val BackGroundColor = Color(0xFF434653)
 val QuoteTextColor = Color(0xFFFFFFFF)
 val SlateGray = Color(0xFF6B707C)
+
+val LightRed = Color(0xFFEF5350)
+
+
