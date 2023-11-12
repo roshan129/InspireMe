@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import java.util.Locale.Category
 import javax.inject.Inject
 
 @HiltViewModel
@@ -62,6 +63,10 @@ class QuotesViewModel @Inject constructor(
     fun changeCategory(tag: String) {
         _quotesCategory.value = tag
         _pageNumber.value = 1
+    }
+
+    fun isCategoryChanged(category: String): Boolean {
+        return quotesCategory.value != category
     }
 
     fun loadMore() {

@@ -297,13 +297,16 @@ fun QuotesMainScreen(
 
                 CategoryLayout(
                     onCategoryCardClicked = { category ->
-                        if (category.equals("General")) {
-                            quotesViewModel.changeCategory("")
-                        } else {
-                            quotesViewModel.changeCategory(category)
+                        if(quotesViewModel.isCategoryChanged(category)) {
+                            if (category.equals("General")) {
+                                quotesViewModel.changeCategory("")
+                            } else {
+                                quotesViewModel.changeCategory(category)
+                            }
+                            showBottomSheet = false
+                            quotesViewModel.getQuotes()
                         }
-                        showBottomSheet = false
-                        quotesViewModel.getQuotes()
+
                     }
                 )
 
