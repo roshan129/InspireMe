@@ -19,12 +19,14 @@ import com.roshanadke.inspireme.presentation.screen.AuthorDataState
 import com.roshanadke.inspireme.presentation.screen.AuthorQuotesState
 import com.roshanadke.inspireme.presentation.screen.QuotesListState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import java.util.Locale.Category
 import javax.inject.Inject
 
@@ -55,6 +57,9 @@ class QuotesViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
+    private val _shouldResetQuotesListEvent = MutableSharedFlow<Boolean>()
+    val shouldResetQuotesList = _shouldResetQuotesListEvent.asSharedFlow()
+
 
     fun changeSelectedAuthorName(authorName: String) {
         _selectedAuthorName.value = authorName
@@ -67,6 +72,12 @@ class QuotesViewModel @Inject constructor(
 
     fun isCategoryChanged(category: String): Boolean {
         return quotesCategory.value != category
+    }
+
+    fun resetQuotesList(flag: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _shouldResetQuotesListEvent.emit(flag)
+        }
     }
 
     fun loadMore() {
@@ -103,6 +114,7 @@ class QuotesViewModel @Inject constructor(
                 }
 
                 is Resource.Success -> {
+                    resetQuotesList(true)
                     _quotesListState.value = _quotesListState.value.copy(
                         randomQuotesList = it.data ?: emptyList(),
                         isLoading = false

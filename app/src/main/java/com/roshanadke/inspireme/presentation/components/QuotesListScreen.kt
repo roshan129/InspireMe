@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,6 +30,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +45,10 @@ import com.roshanadke.inspireme.domain.model.Quote
 import com.roshanadke.inspireme.presentation.ui.theme.BackGroundColor
 import com.roshanadke.inspireme.presentation.ui.theme.QuoteTextColor
 import com.roshanadke.inspireme.presentation.ui.theme.SlateGray
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -54,8 +60,16 @@ fun QuotesListScreen(
     downloadButtonClicked: (quote: Quote) -> Unit,
     copyButtonClicked: (quote: Quote) -> Unit,
     loadMoreQuotes: () -> Unit,
+    resetList: SharedFlow<Boolean>
 ) {
+
     val listState = rememberLazyListState()
+
+    LaunchedEffect(Unit) {
+        resetList.collectLatest {
+            listState.animateScrollToItem(0)
+        }
+    }
 
     Box(
         modifier = Modifier

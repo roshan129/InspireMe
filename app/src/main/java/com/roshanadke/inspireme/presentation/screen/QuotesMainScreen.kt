@@ -43,6 +43,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -82,9 +83,13 @@ import com.roshanadke.inspireme.presentation.ui.theme.QuoteTextColor
 import com.roshanadke.inspireme.presentation.ui.theme.SlateGray
 import com.roshanadke.inspireme.presentation.viewmodel.AuthorViewModel
 import com.roshanadke.inspireme.presentation.viewmodel.QuotesViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.runtime.LaunchedEffect as LaunchedEffect1
 
 
@@ -129,6 +134,7 @@ fun QuotesMainScreen(
         mutableStateOf(null)
     }
 
+
     if (isShareButtonClicked) {
         AndroidView(
             factory = { ctxt ->
@@ -145,7 +151,7 @@ fun QuotesMainScreen(
     }
 
     if (!isInitialApiCallCompleted) {
-        LaunchedEffect1(Unit) {
+        LaunchedEffect(Unit) {
             quotesViewModel.getQuotes()
             isInitialApiCallCompleted = true
 
@@ -220,7 +226,8 @@ fun QuotesMainScreen(
             },
             loadMoreQuotes = {
                 quotesViewModel.loadMore()
-            }
+            },
+            resetList = quotesViewModel.shouldResetQuotesList
         )
 
         Box(
@@ -297,7 +304,8 @@ fun QuotesMainScreen(
 
                 CategoryLayout(
                     onCategoryCardClicked = { category ->
-                        if(quotesViewModel.isCategoryChanged(category)) {
+
+                        if (quotesViewModel.isCategoryChanged(category)) {
                             if (category.equals("General")) {
                                 quotesViewModel.changeCategory("")
                             } else {
