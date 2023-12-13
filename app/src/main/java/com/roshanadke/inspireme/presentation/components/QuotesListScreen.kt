@@ -88,8 +88,6 @@ fun QuotesListScreen(
 
             itemsIndexed(quotes) { index, quote ->
 
-                Log.d("TAG", "QuotesListScreen: index: $index")
-
                 if (index == quotes.size - 5) {
                     loadMoreQuotes()
                 }
@@ -123,7 +121,6 @@ fun QuotesListScreen(
                             color = QuoteTextColor,
                             textAlign = TextAlign.Center,
                             lineHeight = 36.sp
-
                         )
 
                         Box(

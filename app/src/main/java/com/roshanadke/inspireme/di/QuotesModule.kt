@@ -78,5 +78,4 @@ class QuotesModule {
         return AuthorRepositoryImpl(api, wikiApi)
     }
 
-
 }

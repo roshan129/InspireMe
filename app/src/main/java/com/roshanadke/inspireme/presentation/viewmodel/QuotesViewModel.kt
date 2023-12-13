@@ -81,7 +81,7 @@ class QuotesViewModel @Inject constructor(
     }
 
     fun loadMore() {
-        if(!isLoadingMore.value) {
+        if (!isLoadingMore.value) {
             _pageNumber.value++
             loadMoreQuotes()
         }
@@ -103,7 +103,8 @@ class QuotesViewModel @Inject constructor(
                         UiEvent.ShowSnackbar(
                             UiText.StringResource(
                                 R.string.something_went_wrong
-                            ))
+                            )
+                        )
                     )
                 }
 
@@ -125,6 +126,7 @@ class QuotesViewModel @Inject constructor(
         }.launchIn(viewModelScope)
 
     }
+
     private fun loadMoreQuotes() {
         quotesRepository.getQuotes(
             Constants.RANDOM_QUOTES_API_LIMIT,
@@ -142,7 +144,8 @@ class QuotesViewModel @Inject constructor(
 
                 is Resource.Success -> {
                     _quotesListState.value = _quotesListState.value.copy(
-                        randomQuotesList = _quotesListState.value.randomQuotesList + (it.data ?: emptyList()),
+                        randomQuotesList = _quotesListState.value.randomQuotesList + (it.data
+                            ?: emptyList()),
                         isLoading = false
                     )
                     _isLoadingMore.value = false
@@ -151,7 +154,6 @@ class QuotesViewModel @Inject constructor(
             }
 
         }.launchIn(viewModelScope)
-
 
     }
 

@@ -1,40 +1,55 @@
 package com.roshanadke.inspireme.presentation
 
+import android.Manifest
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.runtime.SideEffect
+import com.roshanadke.inspireme.notifications.setDailyNotification
 import com.roshanadke.inspireme.presentation.navigation.Navigation
 import com.roshanadke.inspireme.presentation.ui.theme.BackGroundColor
 import com.roshanadke.inspireme.presentation.ui.theme.InspireMeTheme
-import com.roshanadke.inspireme.presentation.viewmodel.QuotesViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             InspireMeTheme {
-
-                /*val quotesViewModel: QuotesViewModel =  hiltViewModel()
-                val quote = quotesViewModel.singleQuote.value
-                val randomQuotes = quotesViewModel.randomQuotes.value*/
-
                 Surface(
                     contentColor = BackGroundColor
                 ) {
-                    Navigation()
-                }
+                    val notificationLauncher = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.RequestPermission(),
+                        onResult = { isGranted ->
+                            if(isGranted) {
+                                //do nothing
+                            }
+                        }
+                    )
 
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        SideEffect {
+                            notificationLauncher.launch(
+                                Manifest.permission.POST_NOTIFICATIONS
+                            )
+                        }
+                    }
+
+                    Navigation()
+
+                }
             }
         }
+        setDailyNotification(this)
     }
 }
 
