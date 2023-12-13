@@ -1,6 +1,5 @@
 package com.roshanadke.inspireme.presentation.viewmodel
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -11,12 +10,9 @@ import com.roshanadke.inspireme.common.Constants
 import com.roshanadke.inspireme.common.Resource
 import com.roshanadke.inspireme.common.UiEvent
 import com.roshanadke.inspireme.common.UiText
-import com.roshanadke.inspireme.domain.model.AuthorWikipediaInfo
+import com.roshanadke.inspireme.domain.connectivity.ConnectivityObserver
 import com.roshanadke.inspireme.domain.model.Quote
-import com.roshanadke.inspireme.domain.repository.AuthorRepository
 import com.roshanadke.inspireme.domain.repository.QuotesRepository
-import com.roshanadke.inspireme.presentation.screen.AuthorDataState
-import com.roshanadke.inspireme.presentation.screen.AuthorQuotesState
 import com.roshanadke.inspireme.presentation.screen.QuotesListState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -27,13 +23,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import java.util.Locale.Category
 import javax.inject.Inject
 
 @HiltViewModel
 class QuotesViewModel @Inject constructor(
     private val quotesRepository: QuotesRepository,
-    private val authorRepository: AuthorRepository
+    private val connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
     private var _singleQuote: MutableState<Quote?> = mutableStateOf(null)
@@ -60,6 +55,18 @@ class QuotesViewModel @Inject constructor(
     private val _shouldResetQuotesListEvent = MutableSharedFlow<Boolean>()
     val shouldResetQuotesList = _shouldResetQuotesListEvent.asSharedFlow()
 
+    private val _networkConnection = mutableStateOf(ConnectivityObserver.Status.AVAILABLE)
+    val networkConnection: State<ConnectivityObserver.Status> = _networkConnection
+
+    init {
+        checkNetworkConnection()
+    }
+
+    private fun checkNetworkConnection() {
+        connectivityObserver.observe().onEach {
+            _networkConnection.value = it
+        }.launchIn(viewModelScope)
+    }
 
     fun changeSelectedAuthorName(authorName: String) {
         _selectedAuthorName.value = authorName
@@ -124,7 +131,6 @@ class QuotesViewModel @Inject constructor(
             }
 
         }.launchIn(viewModelScope)
-
     }
 
     private fun loadMoreQuotes() {

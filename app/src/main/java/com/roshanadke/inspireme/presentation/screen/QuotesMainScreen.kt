@@ -1,36 +1,18 @@
 package com.roshanadke.inspireme.presentation.screen
 
 import android.graphics.Bitmap
-import android.util.Log
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.CopyAll
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -38,6 +20,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -59,7 +42,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -67,30 +49,21 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.roshanadke.inspireme.R
 import com.roshanadke.inspireme.common.ComposableBitmapGenerator
-import com.roshanadke.inspireme.common.Constants
-import com.roshanadke.inspireme.common.MultipleEventsCutter
 import com.roshanadke.inspireme.common.UiEvent
-import com.roshanadke.inspireme.common.get
+import com.roshanadke.inspireme.common.getSnackBarBackgroundColor
 import com.roshanadke.inspireme.common.saveBitmapAsImage
 import com.roshanadke.inspireme.common.shareBitmap
 import com.roshanadke.inspireme.common.showToast
+import com.roshanadke.inspireme.domain.connectivity.ConnectivityObserver
 import com.roshanadke.inspireme.domain.model.Quote
 import com.roshanadke.inspireme.presentation.components.CategoryLayout
 import com.roshanadke.inspireme.presentation.components.QuotesListScreen
 import com.roshanadke.inspireme.presentation.navigation.Screen
 import com.roshanadke.inspireme.presentation.ui.theme.BackGroundColor
-import com.roshanadke.inspireme.presentation.ui.theme.QuoteTextColor
 import com.roshanadke.inspireme.presentation.ui.theme.SlateGray
-import com.roshanadke.inspireme.presentation.viewmodel.AuthorViewModel
 import com.roshanadke.inspireme.presentation.viewmodel.QuotesViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import androidx.compose.runtime.LaunchedEffect as LaunchedEffect1
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -109,10 +82,32 @@ fun QuotesMainScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    //val quotes = quotesViewModel.randomQuotes.value
-
     val quotesListState = quotesViewModel.quotesListState.value
     val selectedCategory = quotesViewModel.quotesCategory
+    val internetConnection = quotesViewModel.networkConnection.value
+
+    var isFirstTimeLaunched by remember {
+        mutableStateOf(true)
+    }
+
+    LaunchedEffect(internetConnection) {
+        if(isFirstTimeLaunched) {
+            isFirstTimeLaunched = false
+            return@LaunchedEffect
+        }
+        when(internetConnection) {
+            ConnectivityObserver.Status.AVAILABLE -> {
+                snackbarHostState.showSnackbar(context.getString(R.string.internet_connection_restored))
+            }
+            ConnectivityObserver.Status.UNAVAILABLE -> {
+                snackbarHostState.showSnackbar(context.getString(R.string.no_internet_connection))
+            }
+            ConnectivityObserver.Status.LOST -> {
+                snackbarHostState.showSnackbar(context.getString(R.string.no_internet_connection))
+            }
+            else -> {}
+        }
+    }
 
     var isInitialApiCallCompleted by rememberSaveable {
         mutableStateOf(false)
@@ -191,10 +186,14 @@ fun QuotesMainScreen(
 
     }
 
-
     Scaffold(
         snackbarHost = {
-            SnackbarHost(snackbarHostState)
+            SnackbarHost(snackbarHostState) {
+                Snackbar(
+                    snackbarData = it,
+                    containerColor = getSnackBarBackgroundColor(context, it.visuals.message)
+                )
+            }
         },
         containerColor = BackGroundColor
     ) {

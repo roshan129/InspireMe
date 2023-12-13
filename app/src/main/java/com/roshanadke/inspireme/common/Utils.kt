@@ -10,7 +10,13 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.ui.graphics.Color
 import androidx.core.app.ShareCompat
+import com.roshanadke.inspireme.R
+import com.roshanadke.inspireme.presentation.ui.theme.BackGroundColor
+import com.roshanadke.inspireme.presentation.ui.theme.DefaultSnackBarColor
+import com.roshanadke.inspireme.presentation.ui.theme.LightGreen
+import com.roshanadke.inspireme.presentation.ui.theme.LightRed
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Random
@@ -72,4 +78,16 @@ fun shareBitmap(context: Context, bitmap: Bitmap, title: String? = null) {
 
 fun Context.showToast(message: String, duration: Int = Toast.LENGTH_SHORT) {
     Toast.makeText(this, message, duration).show()
+}
+
+fun getSnackBarBackgroundColor(context: Context, message: String): Color {
+    return when(message) {
+        context.getString(R.string.no_internet_connection) -> {
+            LightRed
+        }
+        context.getString(R.string.internet_connection_restored) -> {
+            LightGreen
+        }
+        else -> DefaultSnackBarColor
+    }
 }

@@ -1,6 +1,9 @@
 package com.roshanadke.inspireme.di
 
+import android.app.Application
 import android.util.Log
+import com.roshanadke.inspireme.domain.connectivity.ConnectivityObserver
+import com.roshanadke.inspireme.data.connectivity.NetworkConnectivityObserver
 import com.roshanadke.inspireme.data.network.InspireMeApiService
 import com.roshanadke.inspireme.data.network.WikipediaAuthorInfoApiService
 import com.roshanadke.inspireme.data.repository.AuthorRepositoryImpl
@@ -76,6 +79,14 @@ class QuotesModule {
         wikiApi: WikipediaAuthorInfoApiService,
     ): AuthorRepository {
         return AuthorRepositoryImpl(api, wikiApi)
+    }
+
+    @Provides
+    @Singleton
+    fun provideNetworkObserver(
+        context: Application
+    ): ConnectivityObserver {
+        return NetworkConnectivityObserver(context)
     }
 
 }
